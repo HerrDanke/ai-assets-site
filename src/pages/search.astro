@@ -1,0 +1,159 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+
+const lang = 'zh';
+
+const skills = await getCollection('skillsZh');
+const agents = await getCollection('agentsZh');
+const workflows = await getCollection('workflowsZh');
+const profiles = await getCollection('profilesZh');
+const tools = await getCollection('toolsZh');
+const prompts = await getCollection('promptsZh');
+
+const allItems = [
+  ...skills.map(s => ({ slug: s.slug, kind: 'skills', title: s.data.title, description: s.data.description, tags: s.data.tags ?? [], version: s.data.version })),
+  ...agents.map(a => ({ slug: a.slug, kind: 'agents', title: a.data.title, description: a.data.description, tags: a.data.tags ?? [], version: a.data.version })),
+  ...workflows.map(w => ({ slug: w.slug, kind: 'workflows', title: w.data.title, description: w.data.description, tags: w.data.tags ?? [], version: w.data.version })),
+  ...profiles.map(p => ({ slug: p.slug, kind: 'profiles', title: p.data.title, description: p.data.description, tags: p.data.tags ?? [], version: p.data.version })),
+  ...tools.map(t => ({ slug: t.slug, kind: 'tools', title: t.data.title, description: t.data.description, tags: t.data.tags ?? [], version: t.data.version })),
+  ...prompts.map(p => ({ slug: p.slug, kind: 'prompts', title: p.data.title, description: p.data.description, tags: p.data.tags ?? [], version: p.data.version })),
+];
+---
+
+<BaseLayout title="搜索" description="搜索所有资产">
+  <h1 class="section-title">搜索</h1>
+  <p class="section-sub">搜索所有 AI 资产 · 共 {allItems.length} 个</p>
+
+  <div class="search-container">
+    <input
+      type="text"
+      id="search-input"
+      class="search-input"
+      placeholder="输入关键词搜索标题、描述、标签..."
+      autocomplete="off"
+    />
+    <div class="search-filters">
+      <button class="filter-btn active" data-filter="all">全部</button>
+      <button class="filter-btn" data-filter="skills">Skills</button>
+      <button class="filter-btn" data-filter="agents">Agents</button>
+      <button class="filter-btn" data-filter="workflows">Workflows</button>
+      <button class="filter-btn" data-filter="profiles">Profiles</button>
+      <button class="filter-btn" data-filter="tools">Tools</button>
+      <button class="filter-btn" data-filter="prompts">Prompts</button>
+    </div>
+    <div id="search-results" class="card-grid">
+      {allItems.map(item => (
+        <a class="card" href={`/${item.kind}/${item.slug}/`} data-slug={item.slug} data-kind={item.kind} data-search-title={item.title.toLowerCase()} data-search-desc={item.description.toLowerCase()} data-search-tags={item.tags.join(' ').toLowerCase()}>
+          <h3>{item.title}</h3>
+          <p>{item.description}</p>
+          <div class="card-meta">
+            <span class="tag kind">{item.kind}</span>
+            <span class="tag version">v{item.version}</span>
+          </div>
+        </a>
+      ))}
+    </div>
+    <div id="search-empty" class="search-empty" style="display: none;">
+      <p>未找到匹配的资产</p>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .search-container {
+    max-width: 100%;
+  }
+  .search-input {
+    width: 100%;
+    padding: 14px 18px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    color: var(--text);
+    font-size: 15px;
+    outline: none;
+    transition: border-color 0.2s;
+    margin-bottom: 16px;
+  }
+  .search-input:focus {
+    border-color: var(--accent);
+  }
+  .search-input::placeholder {
+    color: var(--text-faint);
+  }
+  .search-filters {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 24px;
+  }
+  .filter-btn {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    padding: 6px 14px;
+    border-radius: 99px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: all 0.2s;
+  }
+  .filter-btn:hover {
+    border-color: var(--accent);
+    color: var(--text);
+  }
+  .filter-btn.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: white;
+  }
+  .search-empty {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-faint);
+  }
+</style>
+
+<script>
+  const searchInput = document.getElementById('search-input');
+  const resultsContainer = document.getElementById('search-results');
+  const emptyState = document.getElementById('search-empty');
+  const filterBtns = document.querySelectorAll('.filter-btn');
+  let activeFilter = 'all';
+
+  function performSearch() {
+    const query = searchInput.value.toLowerCase().trim();
+    const cards = resultsContainer.querySelectorAll('.card');
+    let visibleCount = 0;
+
+    cards.forEach(card => {
+      const kind = card.dataset.kind;
+      const title = card.dataset.searchTitle || '';
+      const desc = card.dataset.searchDesc || '';
+      const tags = card.dataset.searchTags || '';
+
+      const matchesFilter = activeFilter === 'all' || kind === activeFilter;
+      const matchesQuery = !query || title.includes(query) || desc.includes(query) || tags.includes(query);
+
+      if (matchesFilter && matchesQuery) {
+        card.style.display = '';
+        visibleCount++;
+      } else {
+        card.style.display = 'none';
+      }
+    });
+
+    emptyState.style.display = visibleCount === 0 ? 'block' : 'none';
+  }
+
+  searchInput.addEventListener('input', performSearch);
+
+  filterBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      filterBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      activeFilter = btn.dataset.filter;
+      performSearch();
+    });
+  });
+</script>

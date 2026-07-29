@@ -1,0 +1,198 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+
+const lang = 'en';
+
+const workflows = await getCollection('workflowsEn');
+const allAgents = await getCollection('agentsEn');
+const allSkills = await getCollection('skillsEn');
+const allProfiles = await getCollection('profilesEn');
+
+const workflowGraphs: Record<string, string> = {};
+
+for (const wf of workflows) {
+  const lines: string[] = ['graph LR'];
+  const participantSlugs = wf.data.participants ?? [];
+  const participants = allAgents.filter(a => participantSlugs.includes(a.slug));
+  const wfSkills = new Set<string>();
+  const wfProfiles = new Set<string>();
+
+  for (const agent of participants) {
+    const agentId = `agent_${agent.slug}`;
+    lines.push(`    ${agentId}["🤖 ${agent.data.title}"]`);
+    for (const skill of (agent.data.skills ?? [])) {
+      lines.push(`    ${agentId} --> skill_${skill}`);
+      wfSkills.add(skill);
+    }
+    for (const profile of (agent.data.profiles ?? [])) {
+      lines.push(`    ${agentId} -.-> profile_${profile}`);
+      wfProfiles.add(profile);
+    }
+  }
+
+  for (const skill of wfSkills) {
+    const skillData = allSkills.find(s => s.slug === skill);
+    lines.push(`    skill_${skill}["📘 ${skillData?.data.title || skill}"]`);
+  }
+
+  for (const profile of wfProfiles) {
+    const profileData = allProfiles.find(p => p.slug === profile);
+    lines.push(`    profile_${profile}["🧩 ${profileData?.data.title || profile}"]`);
+  }
+
+  const wfId = `wf_${wf.slug}`;
+  lines.push(`    ${wfId}["⚙️ ${wf.data.title}:::workflow"]`);
+  for (const participant of participantSlugs) {
+    lines.push(`    ${wfId} --> agent_${participant}`);
+  }
+
+  lines.push('    classDef agent fill:#7c6cff,stroke:#7c6cff,color:#fff');
+  lines.push('    classDef skill fill:#4dd6c8,stroke:#4dd6c8,color:#0a0b10');
+  lines.push('    classDef profile fill:#f5a623,stroke:#f5a623,color:#0a0b10');
+  lines.push('    classDef workflow fill:#ff6b6b,stroke:#ff6b6b,color:#fff');
+
+  workflowGraphs[wf.slug] = lines.join('\n');
+}
+
+const allLines: string[] = ['graph LR'];
+for (const agent of allAgents) {
+  const agentId = `agent_${agent.slug}`;
+  allLines.push(`    ${agentId}["🤖 ${agent.data.title}"]`);
+  for (const skill of (agent.data.skills ?? [])) {
+    allLines.push(`    ${agentId} --> skill_${skill}`);
+  }
+  for (const profile of (agent.data.profiles ?? [])) {
+    allLines.push(`    ${agentId} -.-> profile_${profile}`);
+  }
+}
+for (const skill of allSkills) {
+  allLines.push(`    skill_${skill.slug}["📘 ${skill.data.title}"]`);
+}
+for (const profile of allProfiles) {
+  allLines.push(`    profile_${profile.slug}["🧩 ${profile.data.title}"]`);
+}
+for (const wf of workflows) {
+  const wfId = `wf_${wf.slug}`;
+  allLines.push(`    ${wfId}["⚙️ ${wf.data.title}:::workflow"]`);
+  for (const participant of (wf.data.participants ?? [])) {
+    allLines.push(`    ${wfId} --> agent_${participant}`);
+  }
+}
+allLines.push('    classDef agent fill:#7c6cff,stroke:#7c6cff,color:#fff');
+allLines.push('    classDef skill fill:#4dd6c8,stroke:#4dd6c8,color:#0a0b10');
+allLines.push('    classDef profile fill:#f5a623,stroke:#f5a623,color:#0a0b10');
+allLines.push('    classDef workflow fill:#ff6b6b,stroke:#ff6b6b,color:#fff');
+workflowGraphs['all'] = allLines.join('\n');
+---
+
+<BaseLayout title="Graph" description="AI asset relationship graph">
+  <h1 class="section-title">Relationship Graph</h1>
+  <p class="section-sub">Click nodes to navigate to asset details</p>
+
+  <div class="legend">
+    <span class="legend-item"><span class="dot agent"></span> Agent</span>
+    <span class="legend-item"><span class="dot skill"></span> Skill</span>
+    <span class="legend-item"><span class="dot profile"></span> Profile</span>
+    <span class="legend-item"><span class="dot workflow"></span> Workflow</span>
+  </div>
+
+  <div class="mermaid-graph" id="graphContainer">
+    {Object.entries(workflowGraphs).map(([slug, graph]) => (
+      <div class="diagram-wrapper" data-workflow={slug}>
+        <pre class="mermaid">{graph}</pre>
+      </div>
+    ))}
+  </div>
+
+  <p class="hint" id="graphHint" style="display:none;">
+    💡 Please select a workflow to view its relationship graph.
+  </p>
+
+  <script is:inline>
+    function initGraph() {
+      var container = document.getElementById('graphContainer');
+      if (!container) return;
+      var wrappers = container.querySelectorAll('.diagram-wrapper');
+      var allRendered = true;
+      for (var i = 0; i < wrappers.length; i++) {
+        if (!wrappers[i].querySelector('svg')) {
+          allRendered = false;
+          break;
+        }
+      }
+      if (!allRendered) {
+        setTimeout(initGraph, 500);
+        return;
+      }
+      var selector = document.getElementById('workflowSelector');
+      var savedWorkflow = selector ? selector.value : '';
+      showWorkflowDiagram(savedWorkflow);
+    }
+
+    function showWorkflowDiagram(slug) {
+      var container = document.getElementById('graphContainer');
+      var hint = document.getElementById('graphHint');
+      if (!container) return;
+      var wrappers = container.querySelectorAll('.diagram-wrapper');
+      for (var i = 0; i < wrappers.length; i++) {
+        wrappers[i].style.display = 'none';
+      }
+      if (slug === 'all' || !slug) {
+        if (hint) hint.style.display = 'block';
+        container.style.display = 'none';
+        return;
+      }
+      if (hint) hint.style.display = 'none';
+      container.style.display = 'block';
+      var target = container.querySelector('.diagram-wrapper[data-workflow="' + slug + '"]');
+      if (target) target.style.display = 'block';
+      fitDiagram();
+    }
+
+    function fitDiagram() {
+      var container = document.getElementById('graphContainer');
+      if (!container || container.style.display === 'none') return;
+      var visible = null;
+      var wrappers = container.querySelectorAll('.diagram-wrapper');
+      for (var i = 0; i < wrappers.length; i++) {
+        if (wrappers[i].style.display !== 'none') visible = wrappers[i];
+      }
+      var svg = visible ? visible.querySelector('svg') : null;
+      if (!svg) return;
+      var w = container.clientWidth;
+      var origW = parseFloat(svg.getAttribute('width')) || 100;
+      var origH = parseFloat(svg.getAttribute('height')) || 100;
+      var scale = w / origW;
+      svg.setAttribute('width', w);
+      svg.setAttribute('height', origH * scale);
+      svg.style.width = w + 'px';
+      svg.style.height = (origH * scale) + 'px';
+    }
+
+    document.addEventListener('workflow:filter', function() {
+      var s = document.getElementById('workflowSelector');
+      showWorkflowDiagram(s ? s.value : '');
+    });
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(initGraph, 1000);
+      });
+    } else {
+      setTimeout(initGraph, 1000);
+    }
+  </script>
+</BaseLayout>
+
+<style>
+  .legend { display: flex; gap: 20px; margin-bottom: 20px; flex-wrap: wrap; }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text-dim); }
+  .dot { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+  .dot.agent { background: #7c6cff; }
+  .dot.skill { background: #4dd6c8; }
+  .dot.profile { background: #f5a623; }
+  .dot.workflow { background: #ff6b6b; }
+  .mermaid-graph { width: 100%; overflow: hidden; }
+  .hint { margin-top: 16px; font-size: 13px; color: var(--text-faint); }
+</style>

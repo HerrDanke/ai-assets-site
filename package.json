@@ -1,0 +1,17 @@
+{
+  "name": "ai-assets-site",
+  "type": "module",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "copy:content": "node copy-content.js",
+    "predev": "node copy-content.js",
+    "dev": "astro dev",
+    "prebuild": "node copy-content.js",
+    "build": "astro build",
+    "preview": "astro preview"
+  },
+  "dependencies": {
+    "astro": "^4.0.0"
+  }
+}

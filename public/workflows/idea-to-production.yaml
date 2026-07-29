@@ -1,0 +1,84 @@
+# ============================================================
+# Graph Blueprint: idea-to-production（想法→落地 流水线）
+# ============================================================
+# 这是 Workflow 资产的示例 YAML 源码文件
+# 实际部署时由 Workflow 详情页引用
+# ============================================================
+
+name: idea-to-production
+version: 1.0.0
+description: "从想法到落地的完整工程流水线"
+
+nodes:
+  - id: main_assistant
+    preset: main-assistant
+    is_entry: true
+
+  - id: wayfinder_node
+    preset: wayfinder
+
+  - id: spec_writer_node
+    preset: spec-writer
+
+  - id: ticket_slicer_node
+    preset: ticket-slicer
+
+  - id: executor_node
+    preset: executor
+
+  - id: reviewer_node
+    preset: reviewer
+
+  - id: evolver_node
+    preset: evolver
+
+edges:
+  - from: main_assistant
+    to: wayfinder_node
+    trigger: "想法模糊，需要大雾规划"
+
+  - from: main_assistant
+    to: spec_writer_node
+    trigger: "想法清晰，需要编写规格"
+
+  - from: main_assistant
+    to: ticket_slicer_node
+    trigger: "规格已完成，需要拆分票据"
+
+  - from: main_assistant
+    to: executor_node
+    trigger: "票据待实现"
+
+  - from: main_assistant
+    to: reviewer_node
+    trigger: "实现待审查"
+
+  - from: main_assistant
+    to: evolver_node
+    trigger: "出现重复失败"
+
+  - from: wayfinder_node
+    to: spec_writer_node
+
+  - from: spec_writer_node
+    to: ticket_slicer_node
+
+  - from: ticket_slicer_node
+    to: executor_node
+
+  - from: executor_node
+    to: reviewer_node
+
+  - from: reviewer_node
+    to: executor_node
+    trigger: "request_changes"
+
+  - from: reviewer_node
+    to: evolver_node
+    trigger: "反复失败"
+
+runtime:
+  instantiation: on_demand
+  concurrency:
+    max_parallel_executors: 3
+  failure_isolation: true

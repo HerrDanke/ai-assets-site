@@ -1,0 +1,299 @@
+---
+import { getCollection } from 'astro:content';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const {
+  title,
+  description,
+} = Astro.props;
+
+// 检测当前语言：/en/ 开头为英文，否则为中文
+const currentPath = Astro.url.pathname;
+const lang = currentPath.startsWith('/en') ? 'en' : 'zh';
+
+// 根据语言选择集合
+const collectionSuffix = lang === 'en' ? 'En' : 'Zh';
+
+const allWorkflows = await getCollection('workflows' + collectionSuffix);
+const allAgents = await getCollection('agents' + collectionSuffix);
+const allSkills = await getCollection('skills' + collectionSuffix);
+const allProfiles = await getCollection('profiles' + collectionSuffix);
+const allTools = await getCollection('tools' + collectionSuffix);
+
+// 构建工作流映射
+const workflowMap: Record<string, { title: string; agents: string[]; skills: string[]; profiles: string[]; tools: string[] }> = {};
+for (const wf of allWorkflows) {
+  const participantSlugs = wf.data.participants ?? [];
+  const participants = allAgents.filter(a => participantSlugs.includes(a.slug));
+  const skills = [...new Set(participants.flatMap(a => a.data.skills ?? []))];
+  const profiles = [...new Set(participants.flatMap(a => a.data.profiles ?? []))];
+  const tools = [...new Set(participants.flatMap(a => a.data.tools ?? []))];
+  workflowMap[wf.slug] = { title: wf.data.title, agents: participantSlugs, skills, profiles, tools };
+}
+
+// 语言切换路径
+const switchLangPath = lang === 'en'
+  ? currentPath.replace(/^\/en/, '') || '/'
+  : '/en' + currentPath;
+
+// 导航文本
+const navText = lang === 'en'
+  ? { skills: 'Skills', agents: 'Agents', workflows: 'Workflows', prompts: 'Prompts', tools: 'Tools', profiles: 'Profiles', graph: 'Graph', search: 'Search', brand: 'AI Assets' }
+  : { skills: 'Skills', agents: 'Agents', workflows: 'Workflows', prompts: 'Prompts', tools: 'Tools', profiles: 'Profiles', graph: '图谱', search: '搜索', brand: 'AI Assets' };
+
+const pageTitle = title || (lang === 'en' ? 'AI Assets Hub' : 'AI 资产管理站');
+const pageDescription = description || (lang === 'en' ? 'Manage and showcase AI assets' : '管理和展示 AI 资产');
+
+function isActive(href) {
+  const checkPath = lang === 'en' ? '/en' + href : href;
+  if (href === '/' && (currentPath === '/' || currentPath === '/en' || currentPath === '/en/')) return true;
+  if (href !== '/' && currentPath.startsWith(checkPath)) return true;
+  return false;
+}
+---
+
+<!doctype html>
+<html lang={lang === 'en' ? 'en' : 'zh-CN'}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={pageDescription} />
+    <title>{pageTitle} · AI Assets Hub</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <script is:inline>
+      (function () {
+        try {
+          var t = localStorage.getItem('theme');
+          if (t === 'light') document.documentElement.setAttribute('data-theme', 'light');
+        } catch (e) {}
+      })();
+    </script>
+    <script type="module">
+      import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+      mermaid.initialize({
+        startOnLoad: true,
+        theme: document.documentElement.getAttribute('data-theme') === 'light' ? 'default' : 'dark',
+        securityLevel: 'strict',
+        flowchart: { useMaxWidth: false, htmlLabels: true, curve: 'basis', nodeSpacing: 30, rankSpacing: 40 },
+        themeVariables: { fontSize: '12px' }
+      });
+    </script>
+    <script is:inline src="/assets/asset-actions.js?v=4"></script>
+  </head>
+  <body>
+    <div id="workflow-status" class="workflow-status"></div>
+    <div class="app">
+      <header class="nav">
+        <a class="brand" href={lang === 'en' ? '/en/' : '/'}>
+          <span class="brand-icon">◆</span>
+          <span>{navText.brand} <b>Hub</b></span>
+        </a>
+        <nav class="nav-links">
+          <a href={lang === 'en' ? '/en/skills/' : '/skills/'} class={isActive('/skills/') ? 'active' : ''}>{navText.skills}</a>
+          <a href={lang === 'en' ? '/en/agents/' : '/agents/'} class={isActive('/agents/') ? 'active' : ''}>{navText.agents}</a>
+          <a href={lang === 'en' ? '/en/workflows/' : '/workflows/'} class={isActive('/workflows/') ? 'active' : ''}>{navText.workflows}</a>
+          <a href={lang === 'en' ? '/en/profiles/' : '/profiles/'} class={isActive('/profiles/') ? 'active' : ''}>{navText.profiles}</a>
+          <a href={lang === 'en' ? '/en/graph/' : '/graph/'} class={isActive('/graph/') ? 'active' : ''}>{navText.graph}</a>
+        </nav>
+        <div class="nav-actions">
+          <button id="workflowDownloadBtn" class="workflow-download-btn" title={lang === 'en' ? 'Download workflow' : '下载当前工作流'} onclick="window.__downloadWorkflow()">📦</button>
+          <select id="workflowSelector" class="workflow-select" aria-label={lang === 'en' ? 'Select workflow' : '选择工作流'}>
+            <option value="">{lang === 'en' ? 'All Workflows' : '所有工作流'}</option>
+            {Object.entries(workflowMap).map(([slug, wf]) => (
+              <option value={slug}>{wf.title}</option>
+            ))}
+          </select>
+          <a class="search-link" href={lang === 'en' ? '/en/search/' : '/search/'}>{navText.search}</a>
+          <button class="theme-btn" id="themeBtn" aria-label="Toggle theme">◐</button>
+          <a class="lang-switch" href={switchLangPath} title={lang === 'en' ? '切换到中文' : 'Switch to English'}>
+            {lang === 'en' ? '中' : 'EN'}
+          </a>
+        </div>
+      </header>
+
+      <main class="main">
+        <slot />
+      </main>
+
+      <footer class="footer">
+        <p>AI Assets Hub · Built with Astro</p>
+      </footer>
+    </div>
+
+    <script set:html={`window.__WORKFLOWS__ = ${JSON.stringify(workflowMap)}; window.__LANG__ = '${lang}'; window.__WORKFLOW_DETAILS__ = ${JSON.stringify(Object.fromEntries(allWorkflows.map(w => [w.slug, { overview: w.data.overview, designPhilosophy: w.data.designPhilosophy }])))};`} />
+
+    <script>
+      document.getElementById('themeBtn')?.addEventListener('click', () => {
+        const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+        if (isLight) {
+          document.documentElement.removeAttribute('data-theme');
+          localStorage.setItem('theme', 'dark');
+        } else {
+          document.documentElement.setAttribute('data-theme', 'light');
+          localStorage.setItem('theme', 'light');
+        }
+      });
+    </script>
+  </body>
+</html>
+
+<style is:global>
+  :root {
+    --bg: #0a0b10;
+    --bg-soft: #12141c;
+    --bg-card: #161924;
+    --bg-elevated: #1c2030;
+    --border: #242838;
+    --border-soft: #1c2030;
+    --text: #e7e9f0;
+    --text-dim: #9aa0b4;
+    --text-faint: #6b7186;
+    --accent: #7c6cff;
+    --accent-2: #4dd6c8;
+    --accent-grad: linear-gradient(110deg, #7c6cff 0%, #4dd6c8 100%);
+    --good: #3ddc84;
+    --warn: #f5a623;
+    --bad: #ff6b6b;
+    --radius: 12px;
+    --radius-sm: 8px;
+    --maxw: 1100px;
+    --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    --font-mono: "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+  }
+
+  [data-theme="light"] {
+    --bg: #f5f6fa;
+    --bg-soft: #ffffff;
+    --bg-card: #ffffff;
+    --bg-elevated: #f0f2f8;
+    --border: #dde1ec;
+    --border-soft: #eef0f6;
+    --text: #1a1d2e;
+    --text-dim: #5a6078;
+    --text-faint: #8890a8;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--text); font-family: var(--font-sans); line-height: 1.7; -webkit-font-smoothing: antialiased; min-height: 100vh; }
+  code, pre { font-family: var(--font-mono); }
+  a { color: inherit; text-decoration: none; }
+
+  .app { display: flex; flex-direction: column; min-height: 100vh; }
+
+  .nav {
+    position: sticky; top: 0; z-index: 50;
+    display: flex; align-items: center; justify-content: space-between;
+    max-width: var(--maxw); width: 100%; margin: 0 auto; padding: 14px 24px;
+    backdrop-filter: blur(12px);
+  }
+  .nav::after {
+    content: ""; position: absolute; inset: 0;
+    background: rgba(10, 11, 16, 0.7); border-bottom: 1px solid var(--border-soft); z-index: -1;
+  }
+  [data-theme="light"] .nav::after { background: rgba(245, 246, 250, 0.85); }
+
+  .brand { display: flex; align-items: center; gap: 8px; font-size: 17px; font-weight: 600; }
+  .brand-icon { background: var(--accent-grad); -webkit-background-clip: text; background-clip: text; color: transparent; font-size: 20px; }
+  .brand b { background: var(--accent-grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+
+  .nav-links { display: flex; gap: 20px; font-size: 14px; }
+  .nav-links a { color: var(--text-dim); transition: color 0.2s; }
+  .nav-links a:hover, .nav-links a.active { color: var(--text); }
+
+  .nav-actions { display: flex; align-items: center; gap: 10px; }
+  .search-link { font-size: 14px; color: var(--text-dim); }
+  .theme-btn {
+    background: none; border: 1px solid var(--border); color: var(--text-dim);
+    cursor: pointer; font-size: 16px; padding: 4px 8px; border-radius: var(--radius-sm); transition: all 0.2s;
+  }
+  .theme-btn:hover { border-color: var(--accent); color: var(--text); }
+
+  .workflow-select {
+    background: var(--bg-elevated); color: var(--text); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 5px 10px; font-size: 13px; cursor: pointer; outline: none;
+    transition: border-color 0.2s; max-width: 180px;
+  }
+  .workflow-select:hover, .workflow-select:focus { border-color: var(--accent); }
+  .workflow-select option { background: var(--bg-card); color: var(--text); }
+
+  .workflow-download-btn {
+    background: var(--bg-elevated); border: 1px solid var(--border); color: var(--text-dim);
+    cursor: pointer; font-size: 14px; width: 32px; height: 32px; border-radius: var(--radius-sm);
+    display: flex; align-items: center; justify-content: center; transition: all 0.2s; padding: 0;
+  }
+  .workflow-download-btn:hover { border-color: var(--accent); color: var(--text); }
+  .workflow-download-btn.loading { animation: spin 1s linear infinite; }
+  @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+  .lang-switch {
+    font-size: 12px; font-weight: 600; padding: 4px 8px; border-radius: var(--radius-sm);
+    border: 1px solid var(--border); color: var(--text-dim); transition: all 0.2s;
+  }
+  .lang-switch:hover { border-color: var(--accent); color: var(--text); }
+
+  .main { flex: 1; max-width: var(--maxw); width: 100%; margin: 0 auto; padding: 40px 24px; }
+  .footer { text-align: center; padding: 32px 24px; color: var(--text-faint); font-size: 13px; border-top: 1px solid var(--border-soft); }
+
+  .section-title { font-size: clamp(22px, 3.5vw, 30px); font-weight: 700; margin-bottom: 8px; letter-spacing: -0.02em; }
+  .section-sub { color: var(--text-dim); margin-bottom: 32px; }
+  .filter-counter { font-size: 13px; color: var(--accent-2); font-weight: 500; margin-left: 8px; }
+
+  .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
+  .card {
+    background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 20px; transition: border-color 0.2s, transform 0.2s, opacity 0.2s;
+  }
+  .card:hover { border-color: var(--accent); transform: translateY(-2px); }
+  .card h3 { font-size: 16px; font-weight: 600; margin-bottom: 6px; }
+  .card p { font-size: 13px; color: var(--text-dim); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .card-meta { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+  .tag { font-size: 11px; padding: 2px 8px; border-radius: 99px; background: var(--bg-elevated); color: var(--text-dim); border: 1px solid var(--border-soft); }
+  .tag.kind { color: var(--accent-2); border-color: rgba(77, 214, 200, 0.3); }
+  .tag.version { color: var(--accent); border-color: rgba(124, 108, 255, 0.3); }
+
+  .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 16px; margin-bottom: 48px; }
+  .stat { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; text-align: center; }
+  .stat b { display: block; font-size: 28px; font-weight: 700; background: var(--accent-grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .stat span { font-size: 13px; color: var(--text-dim); }
+
+  .card-actions {
+    position: absolute; top: 10px; right: 10px; display: flex; gap: 4px; opacity: 0; transition: opacity 0.2s;
+  }
+  .card { position: relative; }
+  .card:hover .card-actions, .card-actions:focus-within { opacity: 1; }
+  .asset-card-btn {
+    background: var(--bg-elevated); border: 1px solid var(--border); color: var(--text-dim);
+    cursor: pointer; font-size: 12px; width: 26px; height: 26px; border-radius: 4px;
+    display: flex; align-items: center; justify-content: center; transition: all 0.15s; padding: 0;
+  }
+  .asset-card-btn:hover { border-color: var(--accent); color: var(--text); background: var(--bg-card); }
+  .asset-card-btn:active { transform: scale(0.92); }
+
+  .asset-toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px);
+    background: var(--bg-elevated); border: 1px solid var(--border); color: var(--text);
+    padding: 10px 20px; border-radius: var(--radius); font-size: 13px; z-index: 9999;
+    opacity: 0; transition: all 0.2s; pointer-events: none;
+  }
+  .asset-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .asset-toast-error { border-color: var(--bad); color: var(--bad); }
+  .asset-toast-success { border-color: var(--good); }
+
+  .workflow-status {
+    position: fixed; bottom: 60px; left: 50%; transform: translateX(-50%);
+    background: var(--bg-elevated); border: 1px solid var(--accent); color: var(--text);
+    padding: 10px 20px; border-radius: var(--radius); font-size: 13px; z-index: 9999;
+    opacity: 0; transition: opacity 0.3s; pointer-events: none; max-width: 80%; text-align: center;
+  }
+  .workflow-status.show { opacity: 1; }
+
+  @media (max-width: 700px) {
+    .nav-links { display: none; }
+    .card-grid { grid-template-columns: 1fr; }
+  }
+</style>

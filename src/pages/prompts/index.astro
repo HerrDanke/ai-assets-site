@@ -1,0 +1,34 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+
+const lang = 'zh';
+const prompts = await getCollection('promptsZh');
+---
+
+<BaseLayout title="Prompts" description="可复用提示词列表">
+  <h1 class="section-title">Prompts</h1>
+  <p class="section-sub">可复用提示词 · {prompts.length} 个</p>
+
+  {prompts.length === 0 ? (
+    <p style="color: var(--text-faint); text-align: center; padding: 40px;">暂无提示词内容</p>
+  ) : (
+    <div class="card-grid">
+      {prompts.map(p => (
+        <a class="card" href={`/prompts/${p.slug}/`} data-slug={p.slug} data-kind="prompts">
+          <div class="card-actions">
+            <button class="asset-card-btn" data-slug={p.slug} data-kind="prompts" data-action="copy" title="复制 Markdown">📋</button>
+            <button class="asset-card-btn" data-slug={p.slug} data-kind="prompts" data-action="download" title="下载 .md">⬇</button>
+          </div>
+          <h3>{p.data.title}</h3>
+          <p>{p.data.description}</p>
+          <div class="card-meta">
+            <span class="tag kind">prompt</span>
+            <span class="tag version">v{p.data.version}</span>
+            {p.data.tags.slice(0, 2).map(t => <span class="tag">#{t}</span>)}
+          </div>
+        </a>
+      ))}
+    </div>
+  )}
+</BaseLayout>

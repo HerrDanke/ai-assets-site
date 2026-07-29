@@ -1,0 +1,63 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+
+const lang = 'en';
+const workflows = await getCollection('workflowsEn');
+---
+
+<BaseLayout title="Workflows" description="Workflows collection">
+  <h1 class="section-title">Workflows</h1>
+  <p class="section-sub">
+    Multi-agent collaboration pipelines · {workflows.length} items
+    <span id="filter-counter" class="filter-counter"></span>
+  </p>
+  <div class="card-grid">
+    {workflows.map(w => (
+      <a class="card" href={`/en/workflows/${w.slug}/`} data-slug={w.slug} data-kind="workflows">
+        <div class="card-actions">
+          <button class="asset-card-btn" data-slug={w.slug} data-kind="workflows" data-action="copy" title="Copy Markdown">📋</button>
+          <button class="asset-card-btn" data-slug={w.slug} data-kind="workflows" data-action="download" title="Download .md">⬇</button>
+        </div>
+        <h3>{w.data.title}</h3>
+        <p>{w.data.description}</p>
+        <div class="card-meta">
+          <span class="tag kind">workflow</span>
+          <span class="tag version">v{w.data.version}</span>
+          {w.data.stages && <span class="tag">{w.data.stages} stages</span>}
+        </div>
+      </a>
+    ))}
+  </div>
+</BaseLayout>
+
+<script>
+  function filterCards() {
+    var selected = document.body.getAttribute('data-workflow') || localStorage.getItem('sp-workflow') || '';
+    var visible = 0, total = 0;
+    document.querySelectorAll('.card[data-kind="workflows"]').forEach(function(card) {
+      total++;
+      var slug = card.getAttribute('data-slug');
+      var show = !selected || slug === selected;
+      card.style.display = show ? '' : 'none';
+      if (show) visible++;
+    });
+    var counter = document.getElementById('filter-counter');
+    if (counter) counter.textContent = selected ? ' (' + visible + '/' + total + ')' : '';
+  }
+
+  function initFilter() {
+    var saved = localStorage.getItem('sp-workflow');
+    if (saved) {
+      document.body.setAttribute('data-workflow', saved);
+    }
+    filterCards();
+  }
+
+  document.addEventListener('workflow:filter', filterCards);
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initFilter);
+  } else {
+    initFilter();
+  }
+</script>

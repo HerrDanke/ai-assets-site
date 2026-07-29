@@ -1,0 +1,221 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+
+const lang = 'zh';
+
+export async function getStaticPaths() {
+  const workflows = await getCollection('workflowsZh');
+  return workflows.map(w => ({
+    params: { slug: w.slug },
+    props: { entry: w },
+  }));
+}
+
+const { entry } = Astro.props;
+const { Content, headings, remarkPluginFrontmatter } = await entry.render();
+const { data } = entry;
+---
+
+<BaseLayout title={data.title} description={data.description}>
+  <div class="detail-layout">
+    <article class="detail-content">
+      <h1 class="section-title">{data.title}</h1>
+      <p class="section-sub">{data.description}</p>
+      <div class="markdown-body">
+        <Content />
+      </div>
+    </article>
+    <aside class="detail-sidebar">
+      <div class="sidebar-card">
+        <h4>元信息</h4>
+        <dl>
+          <dt>版本</dt>
+          <dd>v{data.version}</dd>
+          <dt>类型</dt>
+          <dd>workflow</dd>
+          {data.stages && <>
+            <dt>阶段数</dt>
+            <dd>{data.stages}</dd>
+          </>}
+          {data.updatedAt && <>
+            <dt>更新日期</dt>
+            <dd>{String(data.updatedAt).slice(0, 10)}</dd>
+          </>}
+        </dl>
+      </div>
+
+      {data.tags && data.tags.length > 0 && (
+        <div class="sidebar-card">
+          <h4>标签</h4>
+          <div class="card-meta">
+            {data.tags.map(tag => (
+              <span class="tag">{tag}</span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {data.participants && data.participants.length > 0 && (
+        <div class="sidebar-card">
+          <h4>参与 Agent</h4>
+          <ul class="sidebar-list">
+            {data.participants.map(agent => (
+              <li><a href={`/agents/${agent}/`}>{agent}</a></li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {data.yamlPath && (
+        <div class="sidebar-card">
+          <h4>YAML 配置</h4>
+          <p style="font-size: 12px; color: var(--text-faint); word-break: break-all;">{data.yamlPath}</p>
+        </div>
+      )}
+
+      {data.diagram && (
+        <div class="sidebar-card">
+          <h4>流程图</h4>
+          <div class="mermaid">{data.diagram}</div>
+        </div>
+      )}
+
+      <div class="sidebar-card sidebar-actions">
+        <button class="asset-card-btn" data-slug={entry.slug} data-kind="workflows" data-action="copy" title="复制 Markdown" style="width: 100%; height: auto; padding: 8px;">📋 复制 Markdown</button>
+        <button class="asset-card-btn" data-slug={entry.slug} data-kind="workflows" data-action="download" title="下载 .md" style="width: 100%; height: auto; padding: 8px;">⬇ 下载 .md</button>
+      </div>
+    </aside>
+  </div>
+</BaseLayout>
+
+<style>
+  .detail-layout {
+    display: grid;
+    grid-template-columns: 1fr 280px;
+    gap: 32px;
+  }
+  .detail-content { min-width: 0; }
+  .markdown-body {
+    margin-top: 24px;
+    line-height: 1.8;
+    font-size: 15px;
+  }
+  .markdown-body :global(h2) {
+    font-size: 20px;
+    margin: 32px 0 12px;
+    font-weight: 600;
+  }
+  .markdown-body :global(h3) {
+    font-size: 17px;
+    margin: 24px 0 10px;
+    font-weight: 600;
+  }
+  .markdown-body :global(p) {
+    margin-bottom: 16px;
+    color: var(--text-dim);
+  }
+  .markdown-body :global(ul), .markdown-body :global(ol) {
+    margin: 12px 0 16px;
+    padding-left: 24px;
+    color: var(--text-dim);
+  }
+  .markdown-body :global(li) {
+    margin-bottom: 6px;
+  }
+  .markdown-body :global(table) {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+    font-size: 14px;
+  }
+  .markdown-body :global(th), .markdown-body :global(td) {
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    text-align: left;
+  }
+  .markdown-body :global(th) {
+    background: var(--bg-elevated);
+    font-weight: 600;
+  }
+  .markdown-body :global(code) {
+    background: var(--bg-elevated);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 13px;
+  }
+  .markdown-body :global(pre) {
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    overflow-x: auto;
+    margin: 16px 0;
+  }
+  .markdown-body :global(pre code) {
+    background: none;
+    padding: 0;
+  }
+  .detail-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .sidebar-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+  }
+  .sidebar-card h4 {
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 12px;
+    color: var(--text);
+  }
+  .sidebar-card dl {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 6px 12px;
+    font-size: 13px;
+  }
+  .sidebar-card dt {
+    color: var(--text-faint);
+  }
+  .sidebar-card dd {
+    color: var(--text);
+    margin: 0;
+  }
+  .sidebar-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .sidebar-list li {
+    margin-bottom: 6px;
+    font-size: 13px;
+  }
+  .sidebar-list a {
+    color: var(--accent-2);
+    transition: color 0.2s;
+  }
+  .sidebar-list a:hover {
+    color: var(--accent);
+  }
+  .sidebar-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .mermaid {
+    background: var(--bg-soft);
+    border-radius: 8px;
+    padding: 12px;
+    overflow-x: auto;
+  }
+  @media (max-width: 800px) {
+    .detail-layout {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
