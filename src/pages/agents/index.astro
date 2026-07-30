@@ -1,59 +1,61 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { getCollection } from 'astro:content';
+import { getCollectionSuffix } from '../../lib/i18n';
+import Card from '../../components/Card.astro';
+import FilterCounter from '../../components/FilterCounter.astro';
 
-const lang = 'zh';
-const agents = await getCollection('agentsZh');
+const lang = Astro.url.pathname.startsWith('/en') ? 'en' : 'zh';
+const suffix = getCollectionSuffix(lang);
+const agents = await getCollection('agents' + suffix);
 ---
 
-<BaseLayout title="Agents" description="Agent 集合">
+<BaseLayout title="Agents" description="Agents collection">
   <h1 class="section-title">Agents</h1>
   <p class="section-sub">
-    智能体角色 · {agents.length} 个
-    <span id="filter-counter" class="filter-counter"></span>
+    {lang === 'en' ? 'Role Presets' : '角色预设'} · {agents.length} {lang === 'en' ? 'total' : '个'}
+    <FilterCounter />
   </p>
+
   <div class="card-grid">
     {agents.map(a => (
-      <a class="card" href={`/agents/${a.slug}/`} data-slug={a.slug} data-kind="agents">
-        <div class="card-actions">
-          <button class="asset-card-btn" data-slug={a.slug} data-kind="agents" data-action="copy" title="复制 Markdown">📋</button>
-          <button class="asset-card-btn" data-slug={a.slug} data-kind="agents" data-action="download" title="下载 .md">⬇</button>
-        </div>
-        <h3>{a.data.title}</h3>
-        <p>{a.data.description}</p>
-        <div class="card-meta">
-          <span class="tag kind">agent</span>
-          <span class="tag version">v{a.data.version}</span>
-          {a.data.role && <span class="tag">{a.data.role}</span>}
-        </div>
-      </a>
+      <Card
+        title={a.data.title}
+        description={a.data.description}
+        href={`/${lang === 'en' ? 'en/' : ''}agents/${a.slug}/`}
+        kind="agent"
+        version={a.data.version}
+        tags={a.data.tags}
+        meta={a.data.skills ? a.data.skills.length + ' skills' : ''}
+      />
     ))}
   </div>
 </BaseLayout>
 
-<script is:inline>
+<script>
   function filterCards() {
-    var selected = document.body.getAttribute("data-workflow") || localStorage.getItem("sp-workflow") || "";
+    var selected = document.body.getAttribute('data-workflow') || localStorage.getItem('sp-workflow') || '';
     var wf = selected ? window.__WORKFLOWS__[selected] : null;
     var allowed = wf ? new Set(wf.agents || []) : null;
     var visible = 0, total = 0;
-    document.querySelectorAll('.card[data-kind="agents"]').forEach(function(card) {
+    document.querySelectorAll('.card[data-kind="agent"]').forEach(function(card) {
       total++;
-      var slug = card.getAttribute('data-slug');
+      var slug = card.getAttribute('href').split('/').filter(Boolean).pop();
       var show = !allowed || allowed.has(slug);
       card.style.display = show ? '' : 'none';
       if (show) visible++;
     });
     var counter = document.getElementById('filter-counter');
-    if (counter) counter.textContent = wf ? '（' + visible + '/' + total + '）' : '';
+    var lang = window.__LANG__ || 'zh';
+    if (counter) counter.textContent = wf ? (lang === 'en' ? ' (' + visible + '/' + total + ')' : '（' + visible + '/' + total + '）') : '';
   }
+
   function initFilter() {
     var saved = localStorage.getItem('sp-workflow');
-    if (saved) {
-      document.body.setAttribute('data-workflow', saved);
-    }
+    if (saved) document.body.setAttribute('data-workflow', saved);
     filterCards();
   }
+
   document.addEventListener('workflow:filter', filterCards);
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initFilter);
@@ -61,3 +63,16 @@ const agents = await getCollection('agentsZh');
     initFilter();
   }
 </script>
+
+<style>
+  .section-title { font-size: clamp(22px, 3.5vw, 30px); font-weight: 700; margin-bottom: 8px; letter-spacing: -0.02em; }
+  .section-sub { color: var(--text-dim); margin-bottom: 32px; }
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr));
+    gap: 16px;
+  }
+  @media (max-width: 480px) {
+    .card-grid { gap: 12px; }
+  }
+</style>

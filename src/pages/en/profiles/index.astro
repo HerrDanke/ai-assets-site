@@ -1,55 +1,60 @@
 ---
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 import { getCollection } from 'astro:content';
+import { getCollectionSuffix } from '../../../lib/i18n';
+import Card from '../../../components/Card.astro';
+import FilterCounter from '../../../components/FilterCounter.astro';
 
-const lang = 'en';
-const profiles = await getCollection('profilesEn');
+const lang = Astro.url.pathname.startsWith('/en') ? 'en' : 'zh';
+const suffix = getCollectionSuffix(lang);
+const profiles = await getCollection('profiles' + suffix);
 ---
 
 <BaseLayout title="Profiles" description="Profiles collection">
   <h1 class="section-title">Profiles</h1>
-  <p class="section-sub">Identity profiles · {profiles.length} items <span id="filter-counter" class="filter-counter"></span></p>
+  <p class="section-sub">
+    {lang === 'en' ? 'Identity Fragments' : '身份画像'} · {profiles.length} {lang === 'en' ? 'total' : '个'}
+    <FilterCounter />
+  </p>
+
   <div class="card-grid">
     {profiles.map(p => (
-      <a class="card" href={`/en/profiles/${p.slug}/`} data-slug={p.slug} data-kind="profiles">
-        <div class="card-actions">
-          <button class="asset-card-btn" data-slug={p.slug} data-kind="profiles" data-action="copy" title="Copy Markdown">📋</button>
-          <button class="asset-card-btn" data-slug={p.slug} data-kind="profiles" data-action="download" title="Download .md">⬇</button>
-        </div>
-        <h3>{p.data.title}</h3>
-        <p>{p.data.description}</p>
-        <div class="card-meta">
-          <span class="tag kind">profile</span>
-          <span class="tag version">v{p.data.version}</span>
-        </div>
-      </a>
+      <Card
+        title={p.data.title}
+        description={p.data.description}
+        href={`/${lang === 'en' ? 'en/' : ''}profiles/${p.slug}/`}
+        kind="profile"
+        version={p.data.version}
+        tags={p.data.tags}
+      />
     ))}
   </div>
 </BaseLayout>
 
-<script is:inline>
+<script>
   function filterCards() {
-    var selected = document.body.getAttribute("data-workflow") || localStorage.getItem("sp-workflow") || "";
+    var selected = document.body.getAttribute('data-workflow') || localStorage.getItem('sp-workflow') || '';
     var wf = selected ? window.__WORKFLOWS__[selected] : null;
     var allowed = wf ? new Set(wf.profiles || []) : null;
     var visible = 0, total = 0;
-    document.querySelectorAll('.card[data-kind="profiles"]').forEach(function(card) {
+    document.querySelectorAll('.card[data-kind="profile"]').forEach(function(card) {
       total++;
-      var slug = card.getAttribute('data-slug');
+      var slug = card.getAttribute('href').split('/').filter(Boolean).pop();
       var show = !allowed || allowed.has(slug);
       card.style.display = show ? '' : 'none';
       if (show) visible++;
     });
     var counter = document.getElementById('filter-counter');
-    if (counter) counter.textContent = wf ? '(' + visible + '/' + total + ')' : '';
+    var lang = window.__LANG__ || 'zh';
+    if (counter) counter.textContent = wf ? (lang === 'en' ? ' (' + visible + '/' + total + ')' : '（' + visible + '/' + total + '）') : '';
   }
+
   function initFilter() {
     var saved = localStorage.getItem('sp-workflow');
-    if (saved) {
-      document.body.setAttribute('data-workflow', saved);
-    }
+    if (saved) document.body.setAttribute('data-workflow', saved);
     filterCards();
   }
+
   document.addEventListener('workflow:filter', filterCards);
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initFilter);
@@ -57,3 +62,16 @@ const profiles = await getCollection('profilesEn');
     initFilter();
   }
 </script>
+
+<style>
+  .section-title { font-size: clamp(22px, 3.5vw, 30px); font-weight: 700; margin-bottom: 8px; letter-spacing: -0.02em; }
+  .section-sub { color: var(--text-dim); margin-bottom: 32px; }
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr));
+    gap: 16px;
+  }
+  @media (max-width: 480px) {
+    .card-grid { gap: 12px; }
+  }
+</style>

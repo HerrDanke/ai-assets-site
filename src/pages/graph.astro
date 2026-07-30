@@ -191,13 +191,24 @@ workflowGraphs['all'] = allLines.join('\n');
 </BaseLayout>
 
 <style>
-  .legend { display: flex; gap: 20px; margin-bottom: 20px; flex-wrap: wrap; }
+  .legend { display: flex; gap: 16px; margin-bottom: 20px; flex-wrap: wrap; }
   .legend-item { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text-dim); }
-  .dot { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+  .dot { width: 12px; height: 12px; border-radius: 3px; display: inline-block; flex-shrink: 0; }
   .dot.agent { background: #7c6cff; }
   .dot.skill { background: #4dd6c8; }
   .dot.profile { background: #f5a623; }
   .dot.workflow { background: #ff6b6b; }
-  .mermaid-graph { width: 100%; overflow: hidden; }
+  .mermaid-graph { width: 100%; overflow: auto; }
+  .diagram-wrapper { min-width: 600px; }
   .hint { margin-top: 16px; font-size: 13px; color: var(--text-faint); }
+  
+  @media (max-width: 768px) {
+    .legend { gap: 12px; }
+    .legend-item { font-size: 12px; }
+    .diagram-wrapper { min-width: 400px; }
+  }
+  @media (max-width: 480px) {
+    .legend { flex-direction: column; gap: 8px; }
+    .diagram-wrapper { min-width: 300px; }
+  }
 </style>

@@ -1,32 +1,33 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { getCollection } from 'astro:content';
+import { getCollectionSuffix } from '../../lib/i18n';
+import Card from '../../components/Card.astro';
+import FilterCounter from '../../components/FilterCounter.astro';
 
-const lang = 'zh';
-const workflows = await getCollection('workflowsZh');
+const lang = Astro.url.pathname.startsWith('/en') ? 'en' : 'zh';
+const suffix = getCollectionSuffix(lang);
+const workflows = await getCollection('workflows' + suffix);
 ---
 
-<BaseLayout title="Workflows" description="工作流集合">
+<BaseLayout title="Workflows" description="Workflows collection">
   <h1 class="section-title">Workflows</h1>
   <p class="section-sub">
-    多 Agent 协作流水线 · {workflows.length} 个
-    <span id="filter-counter" class="filter-counter"></span>
+    {lang === 'en' ? 'Multi-Agent Pipelines' : '多 Agent 协作流水线'} · {workflows.length} {lang === 'en' ? 'total' : '个'}
+    <FilterCounter />
   </p>
+
   <div class="card-grid">
     {workflows.map(w => (
-      <a class="card" href={`/workflows/${w.slug}/`} data-slug={w.slug} data-kind="workflows">
-        <div class="card-actions">
-          <button class="asset-card-btn" data-slug={w.slug} data-kind="workflows" data-action="copy" title="复制 Markdown">📋</button>
-          <button class="asset-card-btn" data-slug={w.slug} data-kind="workflows" data-action="download" title="下载 .md">⬇</button>
-        </div>
-        <h3>{w.data.title}</h3>
-        <p>{w.data.description}</p>
-        <div class="card-meta">
-          <span class="tag kind">workflow</span>
-          <span class="tag version">w{w.data.version}</span>
-          {w.data.stages && <span class="tag">{w.data.stages} 阶段</span>}
-        </div>
-      </a>
+      <Card
+        title={w.data.title}
+        description={w.data.description}
+        href={`/${lang === 'en' ? 'en/' : ''}workflows/${w.slug}/`}
+        kind="workflow"
+        version={w.data.version}
+        tags={w.data.tags}
+        meta={w.data.stages ? (w.data.stages + ' stages') : ''}
+      />
     ))}
   </div>
 </BaseLayout>
@@ -35,23 +36,21 @@ const workflows = await getCollection('workflowsZh');
   function filterCards() {
     var selected = document.body.getAttribute('data-workflow') || localStorage.getItem('sp-workflow') || '';
     var visible = 0, total = 0;
-    document.querySelectorAll('.card[data-kind="workflows"]').forEach(function(card) {
+    document.querySelectorAll('.card[data-kind="workflow"]').forEach(function(card) {
       total++;
-      var slug = card.getAttribute('data-slug');
+      var slug = card.getAttribute('href').split('/').filter(Boolean).pop();
       var show = !selected || slug === selected;
       card.style.display = show ? '' : 'none';
       if (show) visible++;
     });
     var counter = document.getElementById('filter-counter');
-    if (counter) counter.textContent = selected ? '（' + visible + '/' + total + '）' : '';
+    var lang = window.__LANG__ || 'zh';
+    if (counter) counter.textContent = selected ? (lang === 'en' ? ' (' + visible + '/' + total + ')' : '（' + visible + '/' + total + '）') : '';
   }
 
-  // 页面加载时恢复选择状态
   function initFilter() {
     var saved = localStorage.getItem('sp-workflow');
-    if (saved) {
-      document.body.setAttribute('data-workflow', saved);
-    }
+    if (saved) document.body.setAttribute('data-workflow', saved);
     filterCards();
   }
 
@@ -62,3 +61,16 @@ const workflows = await getCollection('workflowsZh');
     initFilter();
   }
 </script>
+
+<style>
+  .section-title { font-size: clamp(22px, 3.5vw, 30px); font-weight: 700; margin-bottom: 8px; letter-spacing: -0.02em; }
+  .section-sub { color: var(--text-dim); margin-bottom: 32px; }
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr));
+    gap: 16px;
+  }
+  @media (max-width: 480px) {
+    .card-grid { gap: 12px; }
+  }
+</style>

@@ -1,0 +1,64 @@
+---
+// src/components/StatGrid.astro
+interface Stat {
+  label: string;
+  count: number;
+  href: string;
+}
+
+interface Props {
+  stats: Stat[];
+}
+
+const { stats } = Astro.props;
+---
+
+<div class="stat-grid">
+  {stats.map(s => (
+    <a class="stat-link" href={s.href}>
+      <div class="stat">
+        <b>{s.count}</b>
+        <span>{s.label}</span>
+      </div>
+    </a>
+  ))}
+</div>
+
+<style>
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 16px;
+    margin-bottom: 48px;
+  }
+  .stat-link {
+    text-decoration: none;
+    color: inherit;
+  }
+  .stat {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: transform 0.2s, border-color 0.2s;
+  }
+  .stat:hover {
+    transform: translateY(-4px);
+    border-color: var(--accent);
+  }
+  .stat b {
+    display: block;
+    font-size: 28px;
+    font-weight: 700;
+    background: var(--accent-grad);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .stat span {
+    font-size: 13px;
+    color: var(--text-dim);
+  }
+</style>

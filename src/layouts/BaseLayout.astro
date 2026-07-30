@@ -1,59 +1,52 @@
 ---
 import { getCollection } from 'astro:content';
+import { getLangFromPath, getNavText, getSwitchLangPath, getCollectionSuffix } from '../lib/i18n';
+import { buildWorkflowMap } from '../lib/workflows';
 
 interface Props {
   title?: string;
   description?: string;
 }
 
-const {
-  title,
-  description,
-} = Astro.props;
+const { title, description } = Astro.props;
 
-// 检测当前语言：/en/ 开头为英文，否则为中文
+// 检测当前语言
 const currentPath = Astro.url.pathname;
-const lang = currentPath.startsWith('/en') ? 'en' : 'zh';
+const lang = getLangFromPath(currentPath);
+const suffix = getCollectionSuffix(lang);
 
-// 根据语言选择集合
-const collectionSuffix = lang === 'en' ? 'En' : 'Zh';
-
-const allWorkflows = await getCollection('workflows' + collectionSuffix);
-const allAgents = await getCollection('agents' + collectionSuffix);
-const allSkills = await getCollection('skills' + collectionSuffix);
-const allProfiles = await getCollection('profiles' + collectionSuffix);
-const allTools = await getCollection('tools' + collectionSuffix);
+// 加载集合
+const allWorkflows = await getCollection('workflows' + suffix);
+const allAgents = await getCollection('agents' + suffix);
+const allSkills = await getCollection('skills' + suffix);
+const allProfiles = await getCollection('profiles' + suffix);
 
 // 构建工作流映射
-const workflowMap: Record<string, { title: string; agents: string[]; skills: string[]; profiles: string[]; tools: string[] }> = {};
-for (const wf of allWorkflows) {
-  const participantSlugs = wf.data.participants ?? [];
-  const participants = allAgents.filter(a => participantSlugs.includes(a.slug));
-  const skills = [...new Set(participants.flatMap(a => a.data.skills ?? []))];
-  const profiles = [...new Set(participants.flatMap(a => a.data.profiles ?? []))];
-  const tools = [...new Set(participants.flatMap(a => a.data.tools ?? []))];
-  workflowMap[wf.slug] = { title: wf.data.title, agents: participantSlugs, skills, profiles, tools };
-}
-
-// 语言切换路径
-const switchLangPath = lang === 'en'
-  ? currentPath.replace(/^\/en/, '') || '/'
-  : '/en' + currentPath;
+const workflowMap = await buildWorkflowMap(suffix);
 
 // 导航文本
-const navText = lang === 'en'
-  ? { skills: 'Skills', agents: 'Agents', workflows: 'Workflows', prompts: 'Prompts', tools: 'Tools', profiles: 'Profiles', graph: 'Graph', search: 'Search', brand: 'AI Assets' }
-  : { skills: 'Skills', agents: 'Agents', workflows: 'Workflows', prompts: 'Prompts', tools: 'Tools', profiles: 'Profiles', graph: '图谱', search: '搜索', brand: 'AI Assets' };
+const navText = getNavText(lang);
+
+// 语言切换路径
+const switchLangPath = getSwitchLangPath(currentPath, lang === 'zh' ? 'en' : 'zh');
 
 const pageTitle = title || (lang === 'en' ? 'AI Assets Hub' : 'AI 资产管理站');
 const pageDescription = description || (lang === 'en' ? 'Manage and showcase AI assets' : '管理和展示 AI 资产');
 
-function isActive(href) {
+function isActive(href: string) {
   const checkPath = lang === 'en' ? '/en' + href : href;
   if (href === '/' && (currentPath === '/' || currentPath === '/en' || currentPath === '/en/')) return true;
   if (href !== '/' && currentPath.startsWith(checkPath)) return true;
   return false;
 }
+
+// 工作流详情（传递给前端）
+const workflowDetails = Object.fromEntries(
+  Object.entries(workflowMap).map(([slug, wf]) => [slug, { overview: wf.overview, designPhilosophy: wf.designPhilosophy }])
+);
+
+// 移动端菜单状态
+let mobileMenuOpen = false;
 ---
 
 <!doctype html>
@@ -78,11 +71,10 @@ function isActive(href) {
         startOnLoad: true,
         theme: document.documentElement.getAttribute('data-theme') === 'light' ? 'default' : 'dark',
         securityLevel: 'strict',
-        flowchart: { useMaxWidth: false, htmlLabels: true, curve: 'basis', nodeSpacing: 30, rankSpacing: 40 },
-        themeVariables: { fontSize: '12px' }
+        flowchart: { useMaxWidth: false, htmlLabels: true, curve: 'basis' },
       });
     </script>
-    <script is:inline src="/assets/asset-actions.js?v=4"></script>
+    <script is:inline src="/assets/asset-actions.js"></script>
   </head>
   <body>
     <div id="workflow-status" class="workflow-status"></div>
@@ -92,6 +84,8 @@ function isActive(href) {
           <span class="brand-icon">◆</span>
           <span>{navText.brand} <b>Hub</b></span>
         </a>
+        
+        <!-- 桌面端导航 -->
         <nav class="nav-links">
           <a href={lang === 'en' ? '/en/skills/' : '/skills/'} class={isActive('/skills/') ? 'active' : ''}>{navText.skills}</a>
           <a href={lang === 'en' ? '/en/agents/' : '/agents/'} class={isActive('/agents/') ? 'active' : ''}>{navText.agents}</a>
@@ -99,6 +93,7 @@ function isActive(href) {
           <a href={lang === 'en' ? '/en/profiles/' : '/profiles/'} class={isActive('/profiles/') ? 'active' : ''}>{navText.profiles}</a>
           <a href={lang === 'en' ? '/en/graph/' : '/graph/'} class={isActive('/graph/') ? 'active' : ''}>{navText.graph}</a>
         </nav>
+        
         <div class="nav-actions">
           <button id="workflowDownloadBtn" class="workflow-download-btn" title={lang === 'en' ? 'Download workflow' : '下载当前工作流'} onclick="window.__downloadWorkflow()">📦</button>
           <select id="workflowSelector" class="workflow-select" aria-label={lang === 'en' ? 'Select workflow' : '选择工作流'}>
@@ -112,8 +107,21 @@ function isActive(href) {
           <a class="lang-switch" href={switchLangPath} title={lang === 'en' ? '切换到中文' : 'Switch to English'}>
             {lang === 'en' ? '中' : 'EN'}
           </a>
+          <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Menu">☰</button>
         </div>
       </header>
+
+      <!-- 移动端导航菜单 -->
+      <div class="mobile-nav" id="mobileNav">
+        <nav class="mobile-nav-links">
+          <a href={lang === 'en' ? '/en/skills/' : '/skills/'} class={isActive('/skills/') ? 'active' : ''}>{navText.skills}</a>
+          <a href={lang === 'en' ? '/en/agents/' : '/agents/'} class={isActive('/agents/') ? 'active' : ''}>{navText.agents}</a>
+          <a href={lang === 'en' ? '/en/workflows/' : '/workflows/'} class={isActive('/workflows/') ? 'active' : ''}>{navText.workflows}</a>
+          <a href={lang === 'en' ? '/en/profiles/' : '/profiles/'} class={isActive('/profiles/') ? 'active' : ''}>{navText.profiles}</a>
+          <a href={lang === 'en' ? '/en/graph/' : '/graph/'} class={isActive('/graph/') ? 'active' : ''}>{navText.graph}</a>
+          <a href={lang === 'en' ? '/en/search/' : '/search/'}>{navText.search}</a>
+        </nav>
+      </div>
 
       <main class="main">
         <slot />
@@ -124,9 +132,11 @@ function isActive(href) {
       </footer>
     </div>
 
-    <script set:html={`window.__WORKFLOWS__ = ${JSON.stringify(workflowMap)}; window.__LANG__ = '${lang}'; window.__WORKFLOW_DETAILS__ = ${JSON.stringify(Object.fromEntries(allWorkflows.map(w => [w.slug, { overview: w.data.overview, designPhilosophy: w.data.designPhilosophy }])))};`} />
+    <script is:inline set:html={`window.__WORKFLOWS__ = ${JSON.stringify(workflowMap)}; window.__LANG__ = '${lang}';`} />
+    <script is:inline set:html={`window.__WORKFLOW_DETAILS__ = ${JSON.stringify(workflowDetails)};`} />
 
     <script>
+      // 主题切换
       document.getElementById('themeBtn')?.addEventListener('click', () => {
         const isLight = document.documentElement.getAttribute('data-theme') === 'light';
         if (isLight) {
@@ -137,6 +147,16 @@ function isActive(href) {
           localStorage.setItem('theme', 'light');
         }
       });
+
+      // 移动端菜单
+      const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+      const mobileNav = document.getElementById('mobileNav');
+      if (mobileMenuBtn && mobileNav) {
+        mobileMenuBtn.addEventListener('click', () => {
+          mobileNav.classList.toggle('open');
+          mobileMenuBtn.textContent = mobileNav.classList.contains('open') ? '✕' : '☰';
+        });
+      }
     </script>
   </body>
 </html>
@@ -182,9 +202,11 @@ function isActive(href) {
   body { background: var(--bg); color: var(--text); font-family: var(--font-sans); line-height: 1.7; -webkit-font-smoothing: antialiased; min-height: 100vh; }
   code, pre { font-family: var(--font-mono); }
   a { color: inherit; text-decoration: none; }
+  img { max-width: 100%; }
 
   .app { display: flex; flex-direction: column; min-height: 100vh; }
 
+  /* ========== 导航栏 ========== */
   .nav {
     position: sticky; top: 0; z-index: 50;
     display: flex; align-items: center; justify-content: space-between;
@@ -197,7 +219,7 @@ function isActive(href) {
   }
   [data-theme="light"] .nav::after { background: rgba(245, 246, 250, 0.85); }
 
-  .brand { display: flex; align-items: center; gap: 8px; font-size: 17px; font-weight: 600; }
+  .brand { display: flex; align-items: center; gap: 8px; font-size: 17px; font-weight: 600; flex-shrink: 0; }
   .brand-icon { background: var(--accent-grad); -webkit-background-clip: text; background-clip: text; color: transparent; font-size: 20px; }
   .brand b { background: var(--accent-grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
 
@@ -205,8 +227,8 @@ function isActive(href) {
   .nav-links a { color: var(--text-dim); transition: color 0.2s; }
   .nav-links a:hover, .nav-links a.active { color: var(--text); }
 
-  .nav-actions { display: flex; align-items: center; gap: 10px; }
-  .search-link { font-size: 14px; color: var(--text-dim); }
+  .nav-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+  .search-link { font-size: 14px; color: var(--text-dim); display: none; }
   .theme-btn {
     background: none; border: 1px solid var(--border); color: var(--text-dim);
     cursor: pointer; font-size: 16px; padding: 4px 8px; border-radius: var(--radius-sm); transition: all 0.2s;
@@ -215,11 +237,10 @@ function isActive(href) {
 
   .workflow-select {
     background: var(--bg-elevated); color: var(--text); border: 1px solid var(--border);
-    border-radius: var(--radius-sm); padding: 5px 10px; font-size: 13px; cursor: pointer; outline: none;
-    transition: border-color 0.2s; max-width: 180px;
+    border-radius: var(--radius-sm); padding: 5px 8px; font-size: 12px; cursor: pointer; outline: none;
+    transition: border-color 0.2s; max-width: 140px;
   }
   .workflow-select:hover, .workflow-select:focus { border-color: var(--accent); }
-  .workflow-select option { background: var(--bg-card); color: var(--text); }
 
   .workflow-download-btn {
     background: var(--bg-elevated); border: 1px solid var(--border); color: var(--text-dim);
@@ -232,68 +253,72 @@ function isActive(href) {
 
   .lang-switch {
     font-size: 12px; font-weight: 600; padding: 4px 8px; border-radius: var(--radius-sm);
-    border: 1px solid var(--border); color: var(--text-dim); transition: all 0.2s;
+    border: 1px solid var(--border); color: var(--text-dim); transition: all 0.2s; display: none;
   }
   .lang-switch:hover { border-color: var(--accent); color: var(--text); }
 
+  .mobile-menu-btn {
+    display: none;
+    background: none; border: 1px solid var(--border); color: var(--text-dim);
+    font-size: 18px; width: 32px; height: 32px; border-radius: var(--radius-sm);
+    cursor: pointer; align-items: center; justify-content: center;
+  }
+
+  /* 移动端导航 */
+  .mobile-nav {
+    display: none;
+    position: fixed; top: 60px; left: 0; right: 0; bottom: 0;
+    background: var(--bg); z-index: 40; padding: 24px;
+    overflow-y: auto;
+  }
+  .mobile-nav.open { display: block; }
+  .mobile-nav-links { display: flex; flex-direction: column; gap: 16px; }
+  .mobile-nav-links a {
+    font-size: 18px; color: var(--text-dim); padding: 12px 0; border-bottom: 1px solid var(--border-soft);
+  }
+  .mobile-nav-links a.active { color: var(--text); }
+
+  /* ========== 主体内容 ========== */
   .main { flex: 1; max-width: var(--maxw); width: 100%; margin: 0 auto; padding: 40px 24px; }
   .footer { text-align: center; padding: 32px 24px; color: var(--text-faint); font-size: 13px; border-top: 1px solid var(--border-soft); }
 
-  .section-title { font-size: clamp(22px, 3.5vw, 30px); font-weight: 700; margin-bottom: 8px; letter-spacing: -0.02em; }
-  .section-sub { color: var(--text-dim); margin-bottom: 32px; }
-  .filter-counter { font-size: 13px; color: var(--accent-2); font-weight: 500; margin-left: 8px; }
-
-  .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
-  .card {
-    background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius);
-    padding: 20px; transition: border-color 0.2s, transform 0.2s, opacity 0.2s;
+  /* ========== 响应式断点 ========== */
+  
+  /* 大屏幕 (1200px+) */
+  @media (min-width: 1200px) {
+    .search-link { display: inline; }
+    .lang-switch { display: inline; }
   }
-  .card:hover { border-color: var(--accent); transform: translateY(-2px); }
-  .card h3 { font-size: 16px; font-weight: 600; margin-bottom: 6px; }
-  .card p { font-size: 13px; color: var(--text-dim); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-  .card-meta { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
-  .tag { font-size: 11px; padding: 2px 8px; border-radius: 99px; background: var(--bg-elevated); color: var(--text-dim); border: 1px solid var(--border-soft); }
-  .tag.kind { color: var(--accent-2); border-color: rgba(77, 214, 200, 0.3); }
-  .tag.version { color: var(--accent); border-color: rgba(124, 108, 255, 0.3); }
 
-  .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 16px; margin-bottom: 48px; }
-  .stat { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; text-align: center; }
-  .stat b { display: block; font-size: 28px; font-weight: 700; background: var(--accent-grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
-  .stat span { font-size: 13px; color: var(--text-dim); }
-
-  .card-actions {
-    position: absolute; top: 10px; right: 10px; display: flex; gap: 4px; opacity: 0; transition: opacity 0.2s;
+  /* 平板 (768px - 1199px) */
+  @media (max-width: 1199px) {
+    .workflow-select { max-width: 120px; font-size: 11px; }
+    .search-link { display: inline; }
+    .lang-switch { display: inline; }
   }
-  .card { position: relative; }
-  .card:hover .card-actions, .card-actions:focus-within { opacity: 1; }
-  .asset-card-btn {
-    background: var(--bg-elevated); border: 1px solid var(--border); color: var(--text-dim);
-    cursor: pointer; font-size: 12px; width: 26px; height: 26px; border-radius: 4px;
-    display: flex; align-items: center; justify-content: center; transition: all 0.15s; padding: 0;
-  }
-  .asset-card-btn:hover { border-color: var(--accent); color: var(--text); background: var(--bg-card); }
-  .asset-card-btn:active { transform: scale(0.92); }
 
-  .asset-toast {
-    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px);
-    background: var(--bg-elevated); border: 1px solid var(--border); color: var(--text);
-    padding: 10px 20px; border-radius: var(--radius); font-size: 13px; z-index: 9999;
-    opacity: 0; transition: all 0.2s; pointer-events: none;
-  }
-  .asset-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-  .asset-toast-error { border-color: var(--bad); color: var(--bad); }
-  .asset-toast-success { border-color: var(--good); }
-
-  .workflow-status {
-    position: fixed; bottom: 60px; left: 50%; transform: translateX(-50%);
-    background: var(--bg-elevated); border: 1px solid var(--accent); color: var(--text);
-    padding: 10px 20px; border-radius: var(--radius); font-size: 13px; z-index: 9999;
-    opacity: 0; transition: opacity 0.3s; pointer-events: none; max-width: 80%; text-align: center;
-  }
-  .workflow-status.show { opacity: 1; }
-
-  @media (max-width: 700px) {
+  /* 手机 (< 768px) */
+  @media (max-width: 768px) {
+    .nav { padding: 12px 16px; }
     .nav-links { display: none; }
-    .card-grid { grid-template-columns: 1fr; }
+    .nav-actions { gap: 6px; }
+    .workflow-select { max-width: 100px; padding: 4px 6px; }
+    .search-link { display: none; }
+    .lang-switch { display: none; }
+    .mobile-menu-btn { display: flex; }
+    
+    .main { padding: 24px 16px; }
+  }
+
+  /* 小手机 (< 480px) */
+  @media (max-width: 480px) {
+    .nav { padding: 10px 12px; }
+    .brand { font-size: 15px; }
+    .workflow-select { max-width: 80px; font-size: 10px; }
+    .workflow-download-btn { width: 28px; height: 28px; font-size: 12px; }
+    .theme-btn { width: 28px; height: 28px; font-size: 14px; }
+    .mobile-menu-btn { width: 28px; height: 28px; font-size: 16px; }
+    
+    .main { padding: 20px 12px; }
   }
 </style>

@@ -1,55 +1,60 @@
 ---
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 import { getCollection } from 'astro:content';
+import { getCollectionSuffix } from '../../../lib/i18n';
+import Card from '../../../components/Card.astro';
+import FilterCounter from '../../../components/FilterCounter.astro';
 
-const lang = 'en';
-const skills = await getCollection('skillsEn');
+const lang = Astro.url.pathname.startsWith('/en') ? 'en' : 'zh';
+const suffix = getCollectionSuffix(lang);
+const skills = await getCollection('skills' + suffix);
 ---
 
 <BaseLayout title="Skills" description="Skills collection">
   <h1 class="section-title">Skills</h1>
-  <p class="section-sub">Methodologies · {skills.length} items <span id="filter-counter" class="filter-counter"></span></p>
+  <p class="section-sub">
+    {lang === 'en' ? 'Methodologies' : '工作方法论'} · {skills.length} {lang === 'en' ? 'total' : '个'}
+    <FilterCounter />
+  </p>
+
   <div class="card-grid">
     {skills.map(s => (
-      <a class="card" href={`/en/skills/${s.slug}/`} data-slug={s.slug} data-kind="skills">
-        <div class="card-actions">
-          <button class="asset-card-btn" data-slug={s.slug} data-kind="skills" data-action="copy" title="Copy Markdown">📋</button>
-          <button class="asset-card-btn" data-slug={s.slug} data-kind="skills" data-action="download" title="Download .md">⬇</button>
-        </div>
-        <h3>{s.data.title}</h3>
-        <p>{s.data.description}</p>
-        <div class="card-meta">
-          <span class="tag kind">skill</span>
-          <span class="tag version">v{s.data.version}</span>
-        </div>
-      </a>
+      <Card
+        title={s.data.title}
+        description={s.data.description}
+        href={`/${lang === 'en' ? 'en/' : ''}skills/${s.slug}/`}
+        kind="skill"
+        version={s.data.version}
+        tags={s.data.tags}
+      />
     ))}
   </div>
 </BaseLayout>
 
-<script is:inline>
+<script>
   function filterCards() {
-    var selected = document.body.getAttribute("data-workflow") || localStorage.getItem("sp-workflow") || "";
+    var selected = document.body.getAttribute('data-workflow') || localStorage.getItem('sp-workflow') || '';
     var wf = selected ? window.__WORKFLOWS__[selected] : null;
     var allowed = wf ? new Set(wf.skills || []) : null;
     var visible = 0, total = 0;
-    document.querySelectorAll('.card[data-kind="skills"]').forEach(function(card) {
+    document.querySelectorAll('.card[data-kind="skill"]').forEach(function(card) {
       total++;
-      var slug = card.getAttribute('data-slug');
+      var slug = card.getAttribute('href').split('/').filter(Boolean).pop();
       var show = !allowed || allowed.has(slug);
       card.style.display = show ? '' : 'none';
       if (show) visible++;
     });
     var counter = document.getElementById('filter-counter');
-    if (counter) counter.textContent = wf ? '(' + visible + '/' + total + ')' : '';
+    var lang = window.__LANG__ || 'zh';
+    if (counter) counter.textContent = wf ? (lang === 'en' ? ' (' + visible + '/' + total + ')' : '（' + visible + '/' + total + '）') : '';
   }
+
   function initFilter() {
     var saved = localStorage.getItem('sp-workflow');
-    if (saved) {
-      document.body.setAttribute('data-workflow', saved);
-    }
+    if (saved) document.body.setAttribute('data-workflow', saved);
     filterCards();
   }
+
   document.addEventListener('workflow:filter', filterCards);
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initFilter);
@@ -57,3 +62,16 @@ const skills = await getCollection('skillsEn');
     initFilter();
   }
 </script>
+
+<style>
+  .section-title { font-size: clamp(22px, 3.5vw, 30px); font-weight: 700; margin-bottom: 8px; letter-spacing: -0.02em; }
+  .section-sub { color: var(--text-dim); margin-bottom: 32px; }
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr));
+    gap: 16px;
+  }
+  @media (max-width: 480px) {
+    .card-grid { gap: 12px; }
+  }
+</style>

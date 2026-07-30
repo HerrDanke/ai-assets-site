@@ -100,8 +100,8 @@ const { data } = entry;
 <style>
   .detail-layout {
     display: grid;
-    grid-template-columns: 1fr 280px;
-    gap: 32px;
+    grid-template-columns: 1fr;
+    gap: 24px;
   }
   .detail-content { min-width: 0; }
   .markdown-body {
@@ -158,6 +158,10 @@ const { data } = entry;
     border-radius: 8px;
     padding: 16px;
     overflow-x: auto;
+  }
+  .mermaid :global(svg) {
+    max-width: 100% !important;
+    height: auto !important;
     margin: 16px 0;
   }
   .markdown-body :global(pre code) {
@@ -210,14 +214,28 @@ const { data } = entry;
   .sidebar-list a:hover {
     color: var(--accent);
   }
+  .card-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .tag {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 99px;
+    background: var(--bg-elevated);
+    color: var(--text-dim);
+    border: 1px solid var(--border-soft);
+  }
   .sidebar-actions {
     display: flex;
     flex-direction: column;
     gap: 8px;
   }
-  @media (max-width: 800px) {
-    .detail-layout {
-      grid-template-columns: 1fr;
-    }
+  @media@media (max-width: 480px) {
+    .markdown-body { font-size: 14px; }
+    .markdown-body :global(h2) { font-size: 18px; }
+    .markdown-body :global(h3) { font-size: 15px; }
+    .sidebar-card { padding: 12px; }
   }
 </style>
