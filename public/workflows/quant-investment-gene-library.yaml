@@ -1,0 +1,63 @@
+name: quant-investment-gene-library
+version: 1.0.0
+description: "Quant Investment Gene Library - Multi-agent investment decision system"
+
+nodes:
+  - id: research_director
+    preset: research-director
+    is_entry: true
+
+  - id: fundamental_analyst
+    preset: fundamental-analyst
+
+  - id: industry_researcher
+    preset: industry-researcher
+
+  - id: quant_researcher
+    preset: quant-researcher
+
+  - id: backtest_engineer
+    preset: backtest-engineer
+
+  - id: risk_officer
+    preset: risk-officer
+
+  - id: investment_officer
+    preset: investment-officer
+
+edges:
+  - from: research_director
+    to: fundamental_analyst
+    trigger: "启动基本面分析"
+
+  - from: research_director
+    to: industry_researcher
+    trigger: "启动行业研究"
+
+  - from: fundamental_analyst
+    to: risk_officer
+    trigger: "提交财务风险信息"
+
+  - from: industry_researcher
+    to: risk_officer
+    trigger: "提交行业风险信息"
+
+  - from: risk_officer
+    to: investment_officer
+    trigger: "提交风险审查意见"
+
+  - from: investment_officer
+    to: research_director
+    trigger: "提交投资决策"
+
+  - from: research_director
+    to: quant_researcher
+    trigger: "启动策略研究"
+
+  - from: quant_researcher
+    to: backtest_engineer
+    trigger: "提交策略逻辑"
+
+  - from: backtest_engineer
+    to: risk_officer
+    trigger: "提交回测验证结果"

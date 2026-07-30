@@ -24,27 +24,14 @@ const { data } = entry;
       <p class="section-sub">{data.description}</p>
       <div class="markdown-body">
         <Content />
+        {data.diagram && (
+          <div class="diagram-container">
+            <div class="mermaid">{data.diagram}</div>
+          </div>
+        )}
       </div>
     </article>
     <aside class="detail-sidebar">
-      <div class="sidebar-card">
-        <h4>元信息</h4>
-        <dl>
-          <dt>版本</dt>
-          <dd>v{data.version}</dd>
-          <dt>类型</dt>
-          <dd>workflow</dd>
-          {data.stages && <>
-            <dt>阶段数</dt>
-            <dd>{data.stages}</dd>
-          </>}
-          {data.updatedAt && <>
-            <dt>更新日期</dt>
-            <dd>{String(data.updatedAt).slice(0, 10)}</dd>
-          </>}
-        </dl>
-      </div>
-
       {data.tags && data.tags.length > 0 && (
         <div class="sidebar-card">
           <h4>标签</h4>
@@ -67,19 +54,7 @@ const { data } = entry;
         </div>
       )}
 
-      {data.yamlPath && (
-        <div class="sidebar-card">
-          <h4>YAML 配置</h4>
-          <p style="font-size: 12px; color: var(--text-faint); word-break: break-all;">{data.yamlPath}</p>
-        </div>
-      )}
 
-      {data.diagram && (
-        <div class="sidebar-card">
-          <h4>流程图</h4>
-          <div class="mermaid">{data.diagram}</div>
-        </div>
-      )}
 
       <div class="sidebar-card sidebar-actions">
         <button class="asset-card-btn" data-slug={entry.slug} data-kind="workflows" data-action="copy" title="复制 Markdown" style="width: 100%; height: auto; padding: 8px;">📋 复制 Markdown</button>
@@ -96,13 +71,6 @@ const { data } = entry;
     gap: 24px;
   }
   .detail-content { min-width: 0; overflow-x: auto; }
-  
-  @media (min-width: 900px) {
-    .detail-layout {
-      grid-template-columns: 1fr 280px;
-      gap: 32px;
-    }
-  }
   .markdown-body {
     margin-top: 24px;
     line-height: 1.8;
@@ -183,19 +151,6 @@ const { data } = entry;
     margin-bottom: 12px;
     color: var(--text);
   }
-  .sidebar-card dl {
-    display: grid;
-    grid-template-columns: auto 1fr;
-    gap: 6px 12px;
-    font-size: 13px;
-  }
-  .sidebar-card dt {
-    color: var(--text-faint);
-  }
-  .sidebar-card dd {
-    color: var(--text);
-    margin: 0;
-  }
   .sidebar-list {
     list-style: none;
     padding: 0;
@@ -225,25 +180,36 @@ const { data } = entry;
     color: var(--text-dim);
     border: 1px solid var(--border-soft);
   }
-  .sidebar-actions {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
   .mermaid {
     background: var(--bg-soft);
     border-radius: 8px;
     padding: 12px;
     overflow-x: auto;
   }
-  .mermaid :global(svg) {
-    max-width: 100% !important;
-    height: auto !important;
+  .sidebar-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  @media (min-width: 900px) {
+    .detail-layout {
+      grid-template-columns: 1fr 280px;
+      gap: 32px;
+    }
   }
   @media (max-width: 480px) {
     .markdown-body { font-size: 14px; }
     .markdown-body :global(h2) { font-size: 18px; }
     .markdown-body :global(h3) { font-size: 15px; }
     .sidebar-card { padding: 12px; }
+  }
+
+  .diagram-container {
+    margin: 32px 0;
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    overflow-x: auto;
   }
 </style>

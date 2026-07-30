@@ -27,24 +27,6 @@ const { data } = entry;
       </div>
     </article>
     <aside class="detail-sidebar">
-      <div class="sidebar-card">
-        <h4>元信息</h4>
-        <dl>
-          <dt>版本</dt>
-          <dd>v{data.version}</dd>
-          <dt>类型</dt>
-          <dd>skill</dd>
-          {data.trigger && <>
-            <dt>触发条件</dt>
-            <dd>{data.trigger}</dd>
-          </>}
-          {data.updatedAt && <>
-            <dt>更新日期</dt>
-            <dd>{String(data.updatedAt).slice(0, 10)}</dd>
-          </>}
-        </dl>
-      </div>
-
       {data.tags && data.tags.length > 0 && (
         <div class="sidebar-card">
           <h4>标签</h4>
@@ -91,7 +73,7 @@ const { data } = entry;
 
       <div class="sidebar-card sidebar-actions">
         <button class="asset-card-btn" data-slug={entry.slug} data-kind="skills" data-action="copy" title="复制 Markdown" style="width: 100%; height: auto; padding: 8px;">📋 复制 Markdown</button>
-        <button class="asset-card-btn" data-slug={entry.slug} data-kind="skills" data-action="download" title="下载 .md" style="width: 100%; height: auto; padding: 8px;">⬇ 下载 .md</button>
+        <button class="asset-card-btn" data-slug={entry.slug} data-kind="skills" data-action="download" title="下 .md" style="width: 100%; height: auto; padding: 8px;">⬇ 下载 .md</button>
       </div>
     </aside>
   </div>
@@ -185,19 +167,6 @@ const { data } = entry;
     margin-bottom: 12px;
     color: var(--text);
   }
-  .sidebar-card dl {
-    display: grid;
-    grid-template-columns: auto 1fr;
-    gap: 6px 12px;
-    font-size: 13px;
-  }
-  .sidebar-card dt {
-    color: var(--text-faint);
-  }
-  .sidebar-card dd {
-    color: var(--text);
-    margin: 0;
-  }
   .sidebar-list {
     list-style: none;
     padding: 0;
@@ -232,7 +201,13 @@ const { data } = entry;
     flex-direction: column;
     gap: 8px;
   }
-  @media@media (max-width: 480px) {
+  @media (min-width: 900px) {
+    .detail-layout {
+      grid-template-columns: 1fr 280px;
+      gap: 32px;
+    }
+  }
+  @media (max-width: 480px) {
     .markdown-body { font-size: 14px; }
     .markdown-body :global(h2) { font-size: 18px; }
     .markdown-body :global(h3) { font-size: 15px; }

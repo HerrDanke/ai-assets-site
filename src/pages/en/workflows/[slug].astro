@@ -24,27 +24,14 @@ const { data } = entry;
       <p class="section-sub">{data.description}</p>
       <div class="markdown-body">
         <Content />
+        {data.diagram && (
+          <div class="diagram-container">
+            <div class="mermaid">{data.diagram}</div>
+          </div>
+        )}
       </div>
     </article>
     <aside class="detail-sidebar">
-      <div class="sidebar-card">
-        <h4>Metadata</h4>
-        <dl>
-          <dt>Version</dt>
-          <dd>v{data.version}</dd>
-          <dt>Type</dt>
-          <dd>workflow</dd>
-          {data.stages && <>
-            <dt>Stages</dt>
-            <dd>{data.stages}</dd>
-          </>}
-          {data.updatedAt && <>
-            <dt>Updated</dt>
-            <dd>{String(data.updatedAt).slice(0, 10)}</dd>
-          </>}
-        </dl>
-      </div>
-
       {data.tags && data.tags.length > 0 && (
         <div class="sidebar-card">
           <h4>Tags</h4>
@@ -67,19 +54,7 @@ const { data } = entry;
         </div>
       )}
 
-      {data.yamlPath && (
-        <div class="sidebar-card">
-          <h4>YAML Config</h4>
-          <p style="font-size: 12px; color: var(--text-faint); word-break: break-all;">{data.yamlPath}</p>
-        </div>
-      )}
 
-      {data.diagram && (
-        <div class="sidebar-card">
-          <h4>Diagram</h4>
-          <div class="mermaid">{data.diagram}</div>
-        </div>
-      )}
 
       <div class="sidebar-card sidebar-actions">
         <button class="asset-card-btn" data-slug={entry.slug} data-kind="workflows" data-action="copy" title="Copy Markdown" style="width: 100%; height: auto; padding: 8px;">📋 Copy Markdown</button>
@@ -95,11 +70,12 @@ const { data } = entry;
     grid-template-columns: 1fr;
     gap: 24px;
   }
-  .detail-content { min-width: 0; }
+  .detail-content { min-width: 0; overflow-x: auto; }
   .markdown-body {
     margin-top: 24px;
     line-height: 1.8;
     font-size: 15px;
+    overflow-x: auto;
   }
   .markdown-body :global(h2) {
     font-size: 20px;
@@ -128,6 +104,8 @@ const { data } = entry;
     border-collapse: collapse;
     margin: 16px 0;
     font-size: 14px;
+    display: block;
+    overflow-x: auto;
   }
   .markdown-body :global(th), .markdown-body :global(td) {
     padding: 10px 12px;
@@ -150,10 +128,6 @@ const { data } = entry;
     border-radius: 8px;
     padding: 16px;
     overflow-x: auto;
-  }
-  .mermaid :global(svg) {
-    max-width: 100% !important;
-    height: auto !important;
     margin: 16px 0;
   }
   .markdown-body :global(pre code) {
@@ -176,19 +150,6 @@ const { data } = entry;
     font-weight: 600;
     margin-bottom: 12px;
     color: var(--text);
-  }
-  .sidebar-card dl {
-    display: grid;
-    grid-template-columns: auto 1fr;
-    gap: 6px 12px;
-    font-size: 13px;
-  }
-  .sidebar-card dt {
-    color: var(--text-faint);
-  }
-  .sidebar-card dd {
-    color: var(--text);
-    margin: 0;
   }
   .sidebar-list {
     list-style: none;
@@ -219,25 +180,36 @@ const { data } = entry;
     color: var(--text-dim);
     border: 1px solid var(--border-soft);
   }
-  .sidebar-actions {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
   .mermaid {
     background: var(--bg-soft);
     border-radius: 8px;
     padding: 12px;
     overflow-x: auto;
   }
-  .mermaid :global(svg) {
-    max-width: 100% !important;
-    height: auto !important;
+  .sidebar-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
   }
-  @media@media@media (max-width: 480px) {
+  @media (min-width: 900px) {
+    .detail-layout {
+      grid-template-columns: 1fr 280px;
+      gap: 32px;
+    }
+  }
+  @media (max-width: 480px) {
     .markdown-body { font-size: 14px; }
     .markdown-body :global(h2) { font-size: 18px; }
     .markdown-body :global(h3) { font-size: 15px; }
     .sidebar-card { padding: 12px; }
+  }
+
+  .diagram-container {
+    margin: 32px 0;
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    overflow-x: auto;
   }
 </style>
