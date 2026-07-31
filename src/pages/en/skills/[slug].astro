@@ -27,24 +27,6 @@ const { data } = entry;
       </div>
     </article>
     <aside class="detail-sidebar">
-      <div class="sidebar-card">
-        <h4>Metadata</h4>
-        <dl>
-          <dt>Version</dt>
-          <dd>v{data.version}</dd>
-          <dt>Type</dt>
-          <dd>skill</dd>
-          {data.trigger && <>
-            <dt>Trigger</dt>
-            <dd>{data.trigger}</dd>
-          </>}
-          {data.updatedAt && <>
-            <dt>Updated</dt>
-            <dd>{String(data.updatedAt).slice(0, 10)}</dd>
-          </>}
-        </dl>
-      </div>
-
       {data.tags && data.tags.length > 0 && (
         <div class="sidebar-card">
           <h4>Tags</h4>
@@ -185,19 +167,6 @@ const { data } = entry;
     margin-bottom: 12px;
     color: var(--text);
   }
-  .sidebar-card dl {
-    display: grid;
-    grid-template-columns: auto 1fr;
-    gap: 6px 12px;
-    font-size: 13px;
-  }
-  .sidebar-card dt {
-    color: var(--text-faint);
-  }
-  .sidebar-card dd {
-    color: var(--text);
-    margin: 0;
-  }
   .sidebar-list {
     list-style: none;
     padding: 0;
@@ -232,7 +201,13 @@ const { data } = entry;
     flex-direction: column;
     gap: 8px;
   }
-  @media@media@media (max-width: 480px) {
+  @media (min-width: 900px) {
+    .detail-layout {
+      grid-template-columns: 1fr 280px;
+      gap: 32px;
+    }
+  }
+  @media (max-width: 480px) {
     .markdown-body { font-size: 14px; }
     .markdown-body :global(h2) { font-size: 18px; }
     .markdown-body :global(h3) { font-size: 15px; }

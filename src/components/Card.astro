@@ -15,8 +15,8 @@ const { title, description, href, kind, version, tags, meta } = Astro.props;
 
 <a class="card" href={href} data-kind={kind}>
   <div class="card-actions">
-    <button class="asset-card-btn" data-slug={href.split('/').filter(Boolean).pop()} data-kind={kind}s" data-action="copy" title="📋">📋</button>
-    <button class="asset-card-btn" data-slug={href.split('/').filter(Boolean).pop()} data-kind={kind}s" data-action="download" title="⬇">⬇</button>
+    <button class="asset-card-btn" data-slug={href.split('/').filter(Boolean).pop()} data-kind={kind + "s"} data-action="copy" title="📋">📋</button>
+    <button class="asset-card-btn" data-slug={href.split('/').filter(Boolean).pop()} data-kind={kind + "s"} data-action="download" title="⬇">⬇</button>
   </div>
   <h3>{title}</h3>
   <p>{description}</p>
