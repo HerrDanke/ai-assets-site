@@ -1,138 +1,46 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { getCollection } from 'astro:content';
-import { getCollectionSuffix } from '../lib/i18n';
 
 const lang = Astro.url.pathname.startsWith('/en') ? 'en' : 'zh';
-const suffix = getCollectionSuffix(lang);
-
-const skills = await getCollection('skills' + suffix);
-const agents = await getCollection('agents' + suffix);
-const workflows = await getCollection('workflows' + suffix);
-const profiles = await getCollection('profiles' + suffix);
-
-const stats = [
-  { label: 'Skills', count: skills.length, href: lang === 'en' ? '/en/skills/' : '/skills/' },
-  { label: 'Agents', count: agents.length, href: lang === 'en' ? '/en/agents/' : '/agents/' },
-  { label: 'Workflows', count: workflows.length, href: lang === 'en' ? '/en/workflows/' : '/workflows/' },
-  { label: 'Profiles', count: profiles.length, href: lang === 'en' ? '/en/profiles/' : '/profiles/' },
-];
 ---
 
 <BaseLayout title={lang === 'en' ? 'Home' : '首页'} description={lang === 'en' ? 'AI Assets Hub' : 'AI 资产管理站'}>
-  <div id="homeAll" style="display:none;">
-    <section class="hero-large">
-      <h1 class="hero-title-large">AI Assets <span class="grad">Hub</span></h1>
-      <p class="hero-sub-large">{lang === 'en' ? 'Manage and showcase AI assets' : '管理和展示 AI 资产'}</p>
-    </section>
-
-    <section>
-      <div class="stat-grid">
-        {stats.map(s => (
-          <a class="stat-link" href={s.href}>
-            <div class="stat">
-              <b>{s.count}</b>
-              <span>{s.label}</span>
-            </div>
-          </a>
-        ))}
-      </div>
-    </section>
-  </div>
-
-  <div id="homeWorkflow" style="display:none;">
-    <div id="workflowContent"></div>
-  </div>
+  <section class="hero">
+    <h1 class="hero-title">AI Assets <span class="grad">Hub</span></h1>
+    <p class="hero-sub">
+      {lang === 'en'
+        ? 'Skills · Agents · Workflows · Prompts · Tools · Profiles — Your AI asset management hub'
+        : 'Skills · Agents · Workflows · Prompts · Tools · Profiles — 一站式 AI 资产管理'}
+    </p>
+  </section>
 </BaseLayout>
 
-<script is:inline>
-  function initHome() {
-    var saved = localStorage.getItem('sp-workflow') || document.getElementById('workflowSelector').value;
-    var allDiv = document.getElementById('homeAll');
-    var wfDiv = document.getElementById('homeWorkflow');
-    var contentDiv = document.getElementById('workflowContent');
-    var lang = window.__LANG__ || 'zh';
-
-    if (!saved) {
-      allDiv.style.display = 'block';
-      wfDiv.style.display = 'none';
-    } else {
-      allDiv.style.display = 'none';
-      wfDiv.style.display = 'block';
-
-      var overview = window.__WORKFLOW_DETAILS__ && window.__WORKFLOW_DETAILS__[saved] ? window.__WORKFLOW_DETAILS__[saved] : null;
-      var wf = window.__WORKFLOWS__[saved];
-      var html = '';
-      if (overview) {
-        html += '<section style="text-align:center;padding:80px 0 60px;">';
-        html += '<h1 style="font-size:clamp(48px,8vw,72px);font-weight:800;letter-spacing:-0.03em;margin:0;"><span style="background:linear-gradient(110deg,#7c6cff 0%,#4dd6c8 100%);-webkit-background-clip:text;background-clip:text;color:transparent;">' + (wf ? wf.title : saved) + '</span></h1>';
-        html += '</section>';
-        if (overview.overview) {
-          html += '<section style="max-width:900px;margin:0 auto 40px;padding:0 24px;"><h2 style="font-size:24px;font-weight:600;margin-bottom:20px;text-align:center;">' + (lang === 'en' ? 'Overview' : '概述') + '</h2><div style="line-height:1.8;color:var(--text);">' + overview.overview + '</div></section>';
-        }
-        if (overview.designPhilosophy) {
-          html += '<section style="max-width:900px;margin:0 auto 40px;padding:0 24px;"><h2 style="font-size:24px;font-weight:600;margin-bottom:20px;text-align:center;">' + (lang === 'en' ? 'Design Philosophy' : '设计哲学') + '</h2><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;">' + renderCards(overview.designPhilosophy) + '</div></section>';
-        }
-      } else {
-        html = '<section style="text-align:center;padding:80px 0;"><h1 style="font-size:clamp(48px,8vw,72px);font-weight:800;">' + (lang === 'en' ? 'Please select a workflow' : '请选择一个工作流') + '</h1></section>';
-      }
-      contentDiv.innerHTML = html;
-    }
-
-    function renderCards(text) {
-      var cards = '';
-      var sections = text.split(/^(?=## )/m);
-      for (var i = 0; i < sections.length; i++) {
-        var section = sections[i].trim();
-        if (!section) continue;
-        var lines = section.split('\n');
-        var sectionTitle = lines[0].replace(/^##\s*/, '');
-        var restContent = lines.slice(1).join('\n').trim();
-        var subParts = restContent.split(/^(?=### )/m);
-        if (subParts.length > 1) {
-          for (var j = 0; j < subParts.length; j++) {
-            var part = subParts[j].trim();
-            if (!part) continue;
-            var partLines = part.split('\n');
-            var subTitle = partLines[0].replace(/^###\s*/, '');
-            var subContent = partLines.slice(1).join('\n').trim();
-            cards += '<div style="background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:20px;min-height:160px;display:flex;flex-direction:column;">';
-            cards += '<h3 style="font-size:15px;font-weight:600;margin:0 0 10px;color:var(--accent-2);">' + subTitle + '</h3>';
-            if (subContent) {
-              cards += '<div style="line-height:1.7;color:var(--text-dim);flex:1;font-size:13px;"><p style="margin:0;">' + subContent.replace(/\n/g, '<br>') + '</p></div>';
-            }
-            cards += '</div>';
-          }
-        } else {
-          cards += '<div style="background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:20px;min-height:160px;display:flex;flex-direction:column;">';
-          cards += '<h3 style="font-size:15px;font-weight:600;margin:0 0 10px;color:var(--accent-2);">' + sectionTitle + '</h3>';
-          if (restContent) {
-            cards += '<div style="line-height:1.7;color:var(--text-dim);flex:1;font-size:13px;"><p style="margin:0;">' + restContent.replace(/\n/g, '<br>') + '</p></div>';
-          }
-          cards += '</div>';
-        }
-      }
-      return cards;
-    }
-  }
-
-  document.addEventListener('workflow:filter', initHome);
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', function() { setTimeout(initHome, 500); });
-  } else {
-    setTimeout(initHome, 500);
-  }
-</script>
-
 <style>
-  .hero-large { text-align: center; padding: 80px 0 60px; }
-  .hero-title-large { font-size: clamp(48px, 8vw, 72px); font-weight: 800; letter-spacing: -0.03em; margin-bottom: 20px; }
-  .hero-sub-large { font-size: 20px; color: var(--text-dim); }
-  .grad { background: var(--accent-grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
-  .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 16px; margin-bottom: 48px; }
-  .stat-link { text-decoration: none; color: inherit; }
-  .stat { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; text-align: center; cursor: pointer; transition: transform 0.2s, border-color 0.2s; }
-  .stat:hover { transform: translateY(-4px); border-color: var(--accent); }
-  .stat b { display: block; font-size: 28px; font-weight: 700; background: var(--accent-grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
-  .stat span { font-size: 13px; color: var(--text-dim); }
+  .hero {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    min-height: 60vh;
+    padding: 40px 24px;
+  }
+  .hero-title {
+    font-size: clamp(48px, 8vw, 72px);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    margin-bottom: 24px;
+  }
+  .hero-sub {
+    font-size: 18px;
+    color: var(--text-dim);
+    max-width: 560px;
+    line-height: 1.8;
+  }
+  .grad {
+    background: var(--accent-grad);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
 </style>

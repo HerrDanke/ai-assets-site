@@ -87,6 +87,7 @@ let mobileMenuOpen = false;
         
         <!-- 桌面端导航 -->
         <nav class="nav-links">
+          <a href={lang === 'en' ? '/en/overview/' : '/overview/'} class={isActive('/overview/') ? 'active' : ''}>{navText.overview}</a>
           <a href={lang === 'en' ? '/en/skills/' : '/skills/'} class={isActive('/skills/') ? 'active' : ''}>{navText.skills}</a>
           <a href={lang === 'en' ? '/en/agents/' : '/agents/'} class={isActive('/agents/') ? 'active' : ''}>{navText.agents}</a>
           <a href={lang === 'en' ? '/en/workflows/' : '/workflows/'} class={isActive('/workflows/') ? 'active' : ''}>{navText.workflows}</a>
@@ -114,6 +115,7 @@ let mobileMenuOpen = false;
       <!-- 移动端导航菜单 -->
       <div class="mobile-nav" id="mobileNav">
         <nav class="mobile-nav-links">
+          <a href={lang === 'en' ? '/en/overview/' : '/overview/'} class={isActive('/overview/') ? 'active' : ''}>{navText.overview}</a>
           <a href={lang === 'en' ? '/en/skills/' : '/skills/'} class={isActive('/skills/') ? 'active' : ''}>{navText.skills}</a>
           <a href={lang === 'en' ? '/en/agents/' : '/agents/'} class={isActive('/agents/') ? 'active' : ''}>{navText.agents}</a>
           <a href={lang === 'en' ? '/en/workflows/' : '/workflows/'} class={isActive('/workflows/') ? 'active' : ''}>{navText.workflows}</a>

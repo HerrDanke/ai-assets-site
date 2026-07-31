@@ -3,6 +3,7 @@
 export type Lang = 'zh' | 'en';
 
 export interface NavText {
+  overview: string;
   skills: string;
   agents: string;
   workflows: string;
@@ -14,6 +15,7 @@ export interface NavText {
 
 const navTexts: Record<Lang, NavText> = {
   zh: {
+    overview: '概览',
     skills: 'Skills',
     agents: 'Agents',
     workflows: 'Workflows',
@@ -23,6 +25,7 @@ const navTexts: Record<Lang, NavText> = {
     brand: 'AI Assets',
   },
   en: {
+    overview: 'Overview',
     skills: 'Skills',
     agents: 'Agents',
     workflows: 'Workflows',
