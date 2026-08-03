@@ -87,8 +87,14 @@ workflowGraphs['all'] = allLines.join('\n');
 ---
 
 <BaseLayout title="Graph" description="资产关系图谱">
-  <h1 class="section-title">资产关系图谱</h1>
-  <p class="section-sub">点击节点跳转到对应资产详情页</p>
+  <section class="page-head">
+    <div class="page-head-kicker">
+      <span class="kicker">Graph</span>
+      <span class="page-count">{Object.keys(workflowGraphs).length - 1}</span>
+    </div>
+    <h1 class="page-title">资产关系图谱</h1>
+    <p class="page-desc">点击节点跳转到对应资产详情页</p>
+  </section>
 
   <div class="legend">
     <span class="legend-item"><span class="dot agent"></span> Agent</span>
@@ -191,24 +197,40 @@ workflowGraphs['all'] = allLines.join('\n');
 </BaseLayout>
 
 <style>
-  .legend { display: flex; gap: 16px; margin-bottom: 20px; flex-wrap: wrap; }
-  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text-dim); }
+  /* Hallmark · genre: modern-minimal · macrostructure: Map / Diagram · theme: brand-violet (custom) · design-system: design.md · designed-as-app */
+  .legend { display: flex; gap: var(--space-md); margin-bottom: var(--space-lg); flex-wrap: wrap; }
+  .legend-item { display: flex; align-items: center; gap: var(--space-2xs); font-size: var(--text-sm); color: var(--color-ink-2); font-family: var(--font-mono); }
   .dot { width: 12px; height: 12px; border-radius: 3px; display: inline-block; flex-shrink: 0; }
-  .dot.agent { background: #7c6cff; }
-  .dot.skill { background: #4dd6c8; }
-  .dot.profile { background: #f5a623; }
-  .dot.workflow { background: #ff6b6b; }
+  .dot.agent { background: var(--color-accent); }
+  .dot.skill { background: var(--color-accent-2); }
+  .dot.profile { background: var(--color-warn); }
+  .dot.workflow { background: var(--color-bad); }
   .mermaid-graph { width: 100%; overflow: auto; }
-  .diagram-wrapper { min-width: 600px; }
-  .hint { margin-top: 16px; font-size: 13px; color: var(--text-faint); }
-  
+  .diagram-wrapper {
+    min-width: 600px;
+    background: var(--color-paper-2);
+    border: 1px solid var(--color-rule);
+    border-radius: var(--radius-lg);
+    padding: var(--space-md);
+    overflow-x: auto;
+  }
+  .mermaid :global(svg) { max-width: 100% !important; height: auto !important; }
+  .hint {
+    margin-top: var(--space-md);
+    font-size: var(--text-sm);
+    color: var(--color-ink-3);
+    padding: var(--space-lg);
+    border: 1px dashed var(--color-rule);
+    border-radius: var(--radius-lg);
+    text-align: center;
+  }
+
   @media (max-width: 768px) {
-    .legend { gap: 12px; }
-    .legend-item { font-size: 12px; }
+    .legend { gap: var(--space-sm); }
     .diagram-wrapper { min-width: 400px; }
   }
   @media (max-width: 480px) {
-    .legend { flex-direction: column; gap: 8px; }
-    .diagram-wrapper { min-width: 300px; }
+    .legend { flex-direction: column; gap: var(--space-xs); }
+    .diagram-wrapper { min-width: 300px; padding: var(--space-xs); }
   }
 </style>

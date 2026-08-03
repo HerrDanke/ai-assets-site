@@ -11,11 +11,17 @@ const skills = await getCollection('skills' + suffix);
 ---
 
 <BaseLayout title="Skills" description="Skills collection">
-  <h1 class="section-title">Skills</h1>
-  <p class="section-sub">
-    {lang === 'en' ? 'Methodologies' : '工作方法论'} · {skills.length} {lang === 'en' ? 'total' : '个'}
-    <FilterCounter />
-  </p>
+  <section class="page-head">
+    <div class="page-head-kicker">
+      <span class="kicker">{lang === 'en' ? 'Methodologies' : '方法论'}</span>
+      <span class="page-count">{skills.length}</span>
+    </div>
+    <h1 class="page-title">Skills</h1>
+    <p class="page-desc">
+      {lang === 'en' ? 'Work methodologies' : '工作方法论'}
+      <FilterCounter />
+    </p>
+  </section>
 
   <div class="card-grid">
     {skills.map(s => (
@@ -62,16 +68,3 @@ const skills = await getCollection('skills' + suffix);
     initFilter();
   }
 </script>
-
-<style>
-  .section-title { font-size: clamp(22px, 3.5vw, 30px); font-weight: 700; margin-bottom: 8px; letter-spacing: -0.02em; }
-  .section-sub { color: var(--text-dim); margin-bottom: 32px; }
-  .card-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr));
-    gap: 16px;
-  }
-  @media (max-width: 480px) {
-    .card-grid { gap: 12px; }
-  }
-</style>

@@ -13,13 +13,14 @@ export async function getStaticPaths() {
 }
 
 const { entry } = Astro.props;
-const { Content, headings, remarkPluginFrontmatter } = await entry.render();
+const { Content } = await entry.render();
 const { data } = entry;
 ---
 
 <BaseLayout title={data.title} description={data.description}>
-  <div class="detail-layout">
+  <div class="detail-layout" data-kind="profile">
     <article class="detail-content">
+      <span class="kicker profile">Profile</span>
       <h1 class="section-title">{data.title}</h1>
       <p class="section-sub">{data.description}</p>
       <div class="markdown-body">
@@ -89,7 +90,7 @@ const { data } = entry;
       )}
 
       <div class="sidebar-card sidebar-actions">
-        <button class="asset-card-btn" data-slug={entry.slug} data-kind="profiles" data-action="copy"       Markdown" style="width: 100%; height: auto; padding: 8px;">📋 复制 Markdown</button>
+        <button class="asset-card-btn" data-slug={entry.slug} data-kind="profiles" data-action="copy" title="复制 Markdown" style="width: 100%; height: auto; padding: 8px;">📋 复制 Markdown</button>
         <button class="asset-card-btn" data-slug={entry.slug} data-kind="profiles" data-action="download" title="下载 .md" style="width: 100%; height: auto; padding: 8px;">⬇ 下载 .md</button>
       </div>
     </aside>
@@ -97,237 +98,137 @@ const { data } = entry;
 </BaseLayout>
 
 <style>
-  .detail-layout {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 24px;
-  }
+  /* Hallmark · genre: modern-minimal · macrostructure: Long Document · theme: brand-violet (custom) · design-system: design.md · designed-as-app */
+  .detail-layout { display: grid; grid-template-columns: 1fr; gap: var(--space-lg); }
   .detail-content { min-width: 0; }
+
   .markdown-body {
-    margin-top: 24px;
+    margin-top: var(--space-lg);
     line-height: 1.8;
-    font-size: 15px;
+    font-size: var(--text-md);
+    max-width: 72ch;
   }
-  .profile-section {
-    margin-bottom: 36px;
-  }
+
+  .profile-section { margin-bottom: var(--space-xl); }
   .profile-section h2 {
-    font-size: 22px;
-    margin: 40px 0 20px;
+    font-family: var(--font-display);
+    font-size: var(--text-xl);
+    margin: var(--space-xl) 0 var(--space-md);
     font-weight: 700;
-    padding-bottom: 8px;
-    border-bottom: 2px solid var(--accent);
+    letter-spacing: -0.02em;
+    padding-bottom: var(--space-xs);
+    border-bottom: 2px solid var(--page-accent);
     display: inline-block;
   }
-  .profile-section h2:first-of-type {
-    margin-top: 24px;
-  }
+  .profile-section h2:first-of-type { margin-top: var(--space-md); }
 
-  /* 特质卡片网格 */
-  .trait-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-    gap: 12px;
-  }
+  .trait-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: var(--space-xs); }
   .trait-card {
-    display: flex;
-    align-items: flex-start;
-    gap: 10px;
-    padding: 14px 16px;
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    font-size: 14px;
+    display: flex; align-items: flex-start; gap: var(--space-xs);
+    padding: var(--space-sm) var(--space-md);
+    background: var(--color-paper-2);
+    border: 1px solid var(--color-rule-soft);
+    border-radius: var(--radius-md);
+    font-size: var(--text-sm);
     line-height: 1.6;
-    transition: border-color 0.2s, transform 0.2s;
+    transition: border-color var(--dur-md) var(--ease-out), transform var(--dur-md) var(--ease-out);
   }
-  .trait-card:hover {
-    border-color: var(--accent-2);
-    transform: translateY(-2px);
-  }
-  .trait-icon {
-    color: var(--accent-2);
-    font-size: 14px;
-    margin-top: 2px;
-    flex-shrink: 0;
-  }
+  .trait-card:hover { border-color: var(--color-accent-2); transform: translateY(-2px); }
+  .trait-icon { color: var(--page-accent); font-size: var(--text-sm); margin-top: 2px; flex-shrink: 0; }
 
-  /* 思维模式列 */
-  .thinking-list {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
+  .thinking-list { display: flex; flex-direction: column; gap: var(--space-xs); }
   .thinking-item {
-    display: flex;
-    align-items: flex-start;
-    gap: 14px;
-    padding: 14px 18px;
-    background: var(--bg-soft);
-    border-left: 3px solid var(--accent-2);
-    border-radius: 0 8px 8px 0;
-    font-size: 14px;
+    display: flex; align-items: flex-start; gap: var(--space-sm);
+    padding: var(--space-sm) var(--space-md);
+    background: var(--color-paper-2);
+    border-left: 3px solid var(--page-accent);
+    border-radius: 0 var(--radius-md) var(--radius-md) 0;
+    font-size: var(--text-sm);
     line-height: 1.7;
   }
   .thinking-num {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 26px;
-    height: 26px;
-    background: var(--accent-2);
-    color: #0a0b10;
-    font-size: 12px;
+    display: flex; align-items: center; justify-content: center;
+    width: 26px; height: 26px;
+    background: var(--page-accent);
+    color: var(--color-paper);
+    font-size: var(--text-xs);
     font-weight: 700;
     border-radius: 50%;
-    flex-shrink: 0;
-    margin-top: 1px;
+    flex-shrink: 0; margin-top: 1px;
+    font-family: var(--font-mono);
   }
 
-  /* 适用场景标签 */
-  .scenario-tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-  }
+  .scenario-tags { display: flex; flex-wrap: wrap; gap: var(--space-xs); }
   .scenario-tag {
-    padding: 8px 18px;
-    background: linear-gradient(135deg, var(--bg-card), var(--bg-elevated));
-    border: 1px solid var(--border);
-    border-radius: 99px;
-    font-size: 13px;
+    padding: var(--space-xs) var(--space-md);
+    background: var(--color-paper-2);
+    border: 1px solid var(--color-rule-soft);
+    border-radius: var(--radius-pill);
+    font-size: var(--text-sm);
     font-weight: 500;
-    color: var(--text);
-    transition: all 0.2s;
+    color: var(--color-ink);
+    transition: all var(--dur-short) var(--ease-out);
   }
-  .scenario-tag:hover {
-    border-color: var(--accent-2);
-    background: var(--bg-card);
-    box-shadow: 0 2px 8px rgba(124, 108, 255, 0.15);
-  }
+  .scenario-tag:hover { border-color: var(--page-accent); color: var(--page-accent); }
 
   .markdown-body :global(h2) {
-    font-size: 20px;
-    margin: 32px 0 12px;
-    font-weight: 600;
+    font-family: var(--font-display);
+    font-size: var(--text-xl);
+    margin: var(--space-xl) 0 var(--space-sm);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    padding-top: var(--space-sm);
+    border-top: 1px solid var(--color-rule-soft);
   }
   .markdown-body :global(h3) {
-    font-size: 17px;
-    margin: 24px 0 10px;
+    font-family: var(--font-display);
+    font-size: var(--text-lg);
+    margin: var(--space-lg) 0 var(--space-xs);
     font-weight: 600;
+    letter-spacing: -0.01em;
   }
-  .markdown-body :global(p) {
-    margin-bottom: 16px;
-    color: var(--text-dim);
-  }
-  .markdown-body :global(ul), .markdown-body :global(ol) {
-    margin: 12px 0 16px;
-    padding-left: 24px;
-    color: var(--text-dim);
-  }
-  .markdown-body :global(li) {
-    margin-bottom: 6px;
-  }
-  .markdown-body :global(table) {
-    width: 100%;
-    border-collapse: collapse;
-    margin: 16px 0;
-    font-size: 14px;
-  }
-  .markdown-body :global(th), .markdown-body :global(td) {
-    padding: 10px 12px;
-    border: 1px solid var(--border);
-    text-align: left;
-  }
-  .markdown-body :global(th) {
-    background: var(--bg-elevated);
-    font-weight: 600;
-  }
-  .markdown-body :global(code) {
-    background: var(--bg-elevated);
-    padding: 2px 6px;
-    border-radius: 4px;
-    font-size: 13px;
-  }
-  .markdown-body :global(pre) {
-    background: var(--bg-soft);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 16px;
-    overflow-x: auto;
-  }
-  .mermaid :global(svg) {
-    max-width: 100% !important;
-    height: auto !important;
-    margin: 16px 0;
-  }
-  .markdown-body :global(pre code) {
-    background: none;
-    padding: 0;
-  }
-  .detail-sidebar {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-  }
-  .sidebar-card {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 16px;
-  }
-  .sidebar-card h4 {
-    font-size: 13px;
-    font-weight: 600;
-    margin-bottom: 12px;
-    color: var(--text);
-  }
-  .sidebar-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-  }
-  .sidebar-list li {
-    margin-bottom: 6px;
-    font-size: 13px;
-    color: var(--text-dim);
-  }
-  .sidebar-list a {
-    color: var(--accent-2);
-    transition: color 0.2s;
-  }
-  .sidebar-list a:hover {
-    color: var(--accent);
-  }
-  .card-meta {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-  }
+  .markdown-body :global(p) { margin-bottom: var(--space-sm); color: var(--color-ink-2); }
+  .markdown-body :global(ul), .markdown-body :global(ol) { margin: var(--space-xs) 0 var(--space-md); padding-left: var(--space-md); color: var(--color-ink-2); }
+  .markdown-body :global(li) { margin-bottom: var(--space-2xs); }
+  .markdown-body :global(table) { width: 100%; border-collapse: collapse; margin: var(--space-md) 0; font-size: var(--text-sm); }
+  .markdown-body :global(th), .markdown-body :global(td) { padding: var(--space-xs) var(--space-sm); border: 1px solid var(--color-rule); text-align: left; }
+  .markdown-body :global(th) { background: var(--color-elevated); font-weight: 600; }
+  .markdown-body :global(code) { background: var(--color-elevated); padding: 2px 6px; border-radius: var(--radius-sm); font-size: var(--text-sm); }
+  .markdown-body :global(pre) { background: var(--color-paper-2); border: 1px solid var(--color-rule-soft); border-radius: var(--radius-md); padding: var(--space-md); overflow-x: auto; margin: var(--space-md) 0; }
+  .markdown-body :global(pre code) { background: none; padding: 0; }
+  .markdown-body :global(blockquote) { border-left: 3px solid var(--page-accent); padding-left: var(--space-sm); color: var(--color-ink-2); margin: var(--space-sm) 0; }
+  .mermaid :global(svg) { max-width: 100% !important; height: auto !important; margin: var(--space-md) 0; }
+
+  .detail-sidebar { display: flex; flex-direction: column; gap: var(--space-sm); }
+  .sidebar-card { background: var(--color-paper-2); border: 1px solid var(--color-rule-soft); border-radius: var(--radius-lg); padding: var(--space-sm); }
+  .sidebar-card h4 { font-family: var(--font-mono); font-size: var(--text-xs); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: var(--space-xs); color: var(--page-accent); border-left: 2px solid var(--page-accent); padding-left: var(--space-xs); }
+  .sidebar-list { list-style: none; padding: 0; margin: 0; }
+  .sidebar-list li { margin-bottom: var(--space-2xs); font-size: var(--text-sm); color: var(--color-ink-2); }
+  .sidebar-list a { color: var(--page-accent); transition: color var(--dur-short) var(--ease-out); }
+  .sidebar-list a:hover { color: var(--color-ink); }
+  .card-meta { display: flex; flex-wrap: wrap; gap: var(--space-2xs); }
   .tag {
-    font-size: 11px;
-    padding: 2px 8px;
-    border-radius: 99px;
-    background: var(--bg-elevated);
-    color: var(--text-dim);
-    border: 1px solid var(--border-soft);
+    font-size: var(--text-xs); padding: 2px 10px; border-radius: var(--radius-pill);
+    background: var(--color-elevated); color: var(--color-ink-2);
+    border: 1px solid var(--color-rule-soft); font-family: var(--font-mono);
   }
-  .sidebar-actions {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
+  .sidebar-actions { display: flex; flex-direction: column; gap: var(--space-xs); }
+  .asset-card-btn {
+    background: var(--color-elevated); border: 1px solid var(--color-rule);
+    color: var(--color-ink-2); cursor: pointer; font-size: var(--text-sm);
+    border-radius: var(--radius-pill);
+    transition: all var(--dur-short) var(--ease-out);
+    font-family: var(--font-body);
   }
+  .asset-card-btn:hover { border-color: var(--page-accent); color: var(--color-ink); }
+  .asset-card-btn:active { transform: translateY(1px); }
+
   @media (min-width: 900px) {
-    .detail-layout {
-      grid-template-columns: 1fr 280px;
-      gap: 32px;
-    }
+    .detail-layout { grid-template-columns: 1fr 280px; gap: var(--space-2xl); }
   }
   @media (max-width: 480px) {
-    .markdown-body { font-size: 14px; }
-    .markdown-body :global(h2) { font-size: 18px; }
-    .markdown-body :global(h3) { font-size: 15px; }
-    .sidebar-card { padding: 12px; }
+    .markdown-body { font-size: var(--text-md); }
+    .sidebar-card { padding: var(--space-xs); }
     .trait-grid { grid-template-columns: 1fr; }
   }
 </style>

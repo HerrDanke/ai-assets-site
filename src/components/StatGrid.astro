@@ -17,48 +17,47 @@ const { stats } = Astro.props;
   {stats.map(s => (
     <a class="stat-link" href={s.href}>
       <div class="stat">
-        <b>{s.count}</b>
-        <span>{s.label}</span>
+        <b class="stat-num">{s.count}</b>
+        <span class="stat-label">{s.label}</span>
       </div>
     </a>
   ))}
 </div>
 
 <style>
+  /* Hallmark · component: stat-grid · genre: modern-minimal · theme: brand-violet (custom) */
   .stat-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-    gap: 16px;
-    margin-bottom: 48px;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: var(--space-md);
   }
-  .stat-link {
-    text-decoration: none;
-    color: inherit;
-  }
+  .stat-link { text-decoration: none; color: inherit; }
   .stat {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 20px;
+    background: var(--color-paper-2);
+    border: 1px solid var(--color-rule-soft);
+    border-radius: var(--radius-lg);
+    padding: var(--space-lg) var(--space-md);
     text-align: center;
     cursor: pointer;
-    transition: transform 0.2s, border-color 0.2s;
+    transition: transform var(--dur-md) var(--ease-out), border-color var(--dur-md) var(--ease-out);
   }
-  .stat:hover {
-    transform: translateY(-4px);
-    border-color: var(--accent);
-  }
-  .stat b {
+  .stat:hover { transform: translateY(-3px); border-color: var(--color-rule); }
+  .stat-num {
     display: block;
-    font-size: 28px;
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 4vw, 2.75rem);
     font-weight: 700;
-    background: var(--accent-grad);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+    color: var(--color-accent);
+    font-variant-numeric: tabular-nums;
+    margin-bottom: var(--space-2xs);
   }
-  .stat span {
-    font-size: 13px;
-    color: var(--text-dim);
+  .stat-label {
+    font-size: var(--text-sm);
+    color: var(--color-ink-2);
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
   }
 </style>

@@ -1,0 +1,98 @@
+/* Hallmark · genre: modern-minimal · macrostructure: multi (Catalogue/Stat-Led/Marquee Hero/Long Document/Map/Index-First) · theme: brand-violet (custom) · design-system: design.md · designed-as-app
+ * anchor hue: 295 (violet) · accent-2: 190 (teal) · dark-first
+ */
+
+:root {
+  /* paper */
+  --color-paper:      oklch(0.14 0.012 280);
+  --color-paper-2:    oklch(0.16 0.012 280);
+  --color-paper-3:    oklch(0.19 0.014 280);
+  --color-elevated:   oklch(0.21 0.015 280);
+
+  /* ink */
+  --color-ink:        oklch(0.93 0.006 280);
+  --color-ink-2:      oklch(0.66 0.02 280);
+  --color-ink-3:      oklch(0.48 0.02 280);
+
+  /* structure */
+  --color-rule:       oklch(0.24 0.015 280);
+  --color-rule-soft:  oklch(0.19 0.012 280);
+
+  /* accent pair (brand violet → teal, used ≤ 5 % of viewport) */
+  --color-accent:     oklch(0.64 0.19 295);
+  --color-accent-2:   oklch(0.78 0.12 190);
+  --color-accent-ink: oklch(0.98 0 0);
+  --color-focus:      oklch(0.7 0.19 295);
+
+  /* semantic */
+  --color-good:       oklch(0.72 0.16 155);
+  --color-warn:       oklch(0.72 0.14 70);
+  --color-bad:        oklch(0.62 0.18 25);
+
+  /* font */
+  --font-display: "Space Grotesk", "PingFang SC", "Microsoft YaHei", sans-serif;
+  --font-body:    "Inter", "PingFang SC", "Microsoft YaHei", sans-serif;
+  --font-mono:    "JetBrains Mono", "SF Mono", Consolas, monospace;
+
+  /* space — 4 pt scale */
+  --space-3xs: 0.25rem;
+  --space-2xs: 0.5rem;
+  --space-xs:  0.75rem;
+  --space-sm:  1rem;
+  --space-md:  1.5rem;
+  --space-lg:  2rem;
+  --space-xl:  3rem;
+  --space-2xl: 4.5rem;
+  --space-3xl: 7rem;
+
+  /* type scale — major third (1.25) */
+  --text-xs:  0.75rem;
+  --text-sm:  0.875rem;
+  --text-md:  1rem;
+  --text-lg:  1.25rem;
+  --text-xl:  1.5625rem;
+  --text-2xl: 1.9531rem;
+  --text-3xl: 2.4414rem;
+  --text-display: clamp(2.5rem, 5vw + 0.5rem, 4.5rem);
+  --text-display-s: clamp(2rem, 4vw + 0.5rem, 3.25rem);
+
+  /* motion */
+  --ease-out:    cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in:     cubic-bezier(0.4, 0, 1, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-short: 150ms;
+  --dur-md:    220ms;
+  --dur-long:  320ms;
+
+  /* radius */
+  --radius-sm:  6px;
+  --radius-md:  8px;
+  --radius-lg:  12px;
+  --radius-pill: 999px;
+
+  /* layout */
+  --maxw: 1120px;
+  --measure: 65ch;
+}
+
+[data-theme="light"] {
+  --color-paper:      oklch(0.97 0.006 280);
+  --color-paper-2:    oklch(0.995 0.002 280);
+  --color-paper-3:    oklch(0.93 0.008 280);
+  --color-elevated:   oklch(0.91 0.008 280);
+
+  --color-ink:        oklch(0.2 0.02 280);
+  --color-ink-2:      oklch(0.42 0.02 280);
+  --color-ink-3:      oklch(0.58 0.02 280);
+
+  --color-rule:       oklch(0.88 0.01 280);
+  --color-rule-soft:  oklch(0.94 0.008 280);
+
+  --color-accent:     oklch(0.55 0.19 295);
+  --color-accent-2:   oklch(0.55 0.12 190);
+  --color-focus:      oklch(0.6 0.19 295);
+
+  --color-good:       oklch(0.55 0.15 155);
+  --color-warn:       oklch(0.58 0.13 70);
+  --color-bad:        oklch(0.55 0.17 25);
+}

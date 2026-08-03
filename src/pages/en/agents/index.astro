@@ -5,24 +5,30 @@ import { getCollectionSuffix } from '../../../lib/i18n';
 import Card from '../../../components/Card.astro';
 import FilterCounter from '../../../components/FilterCounter.astro';
 
-const lang = Astro.url.pathname.startsWith('/en') ? 'en' : 'zh';
+const lang = 'en';
 const suffix = getCollectionSuffix(lang);
 const agents = await getCollection('agents' + suffix);
 ---
 
 <BaseLayout title="Agents" description="Agents collection">
-  <h1 class="section-title">Agents</h1>
-  <p class="section-sub">
-    {lang === 'en' ? 'Role Presets' : '角色预设'} · {agents.length} {lang === 'en' ? 'total' : '个'}
-    <FilterCounter />
-  </p>
+  <section class="page-head">
+    <div class="page-head-kicker">
+      <span class="kicker">Role Presets</span>
+      <span class="page-count">{agents.length}</span>
+    </div>
+    <h1 class="page-title">Agents</h1>
+    <p class="page-desc">
+      Role presets
+      <FilterCounter />
+    </p>
+  </section>
 
   <div class="card-grid">
     {agents.map(a => (
       <Card
         title={a.data.title}
         description={a.data.description}
-        href={`/${lang === 'en' ? 'en/' : ''}agents/${a.slug}/`}
+        href={`/en/agents/${a.slug}/`}
         kind="agent"
         version={a.data.version}
         tags={a.data.tags}
@@ -46,7 +52,7 @@ const agents = await getCollection('agents' + suffix);
       if (show) visible++;
     });
     var counter = document.getElementById('filter-counter');
-    var lang = window.__LANG__ || 'zh';
+    var lang = window.__LANG__ || 'en';
     if (counter) counter.textContent = wf ? (lang === 'en' ? ' (' + visible + '/' + total + ')' : '（' + visible + '/' + total + '）') : '';
   }
 
@@ -63,16 +69,3 @@ const agents = await getCollection('agents' + suffix);
     initFilter();
   }
 </script>
-
-<style>
-  .section-title { font-size: clamp(22px, 3.5vw, 30px); font-weight: 700; margin-bottom: 8px; letter-spacing: -0.02em; }
-  .section-sub { color: var(--text-dim); margin-bottom: 32px; }
-  .card-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr));
-    gap: 16px;
-  }
-  @media (max-width: 480px) {
-    .card-grid { gap: 12px; }
-  }
-</style>
