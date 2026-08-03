@@ -1,4 +1,12 @@
 ---
+import '../../tokens.css';
+import '@fontsource/space-grotesk/500.css';
+import '@fontsource/space-grotesk/700.css';
+import '@fontsource/inter/400.css';
+import '@fontsource/inter/600.css';
+import '@fontsource/inter/700.css';
+import '@fontsource/jetbrains-mono/400.css';
+import '@fontsource/jetbrains-mono/500.css';
 import { getCollection } from 'astro:content';
 import { getLangFromPath, getNavText, getSwitchLangPath, getCollectionSuffix } from '../lib/i18n';
 import { buildWorkflowMap } from '../lib/workflows';
@@ -81,12 +89,12 @@ let mobileMenuOpen = false;
     <div class="app">
       <header class="nav">
         <a class="brand" href={lang === 'en' ? '/en/' : '/'}>
-          <span class="brand-icon">◆</span>
-          <span>{navText.brand} <b>Hub</b></span>
+          <span class="brand-mark">◆</span>
+          <span class="brand-name">AI Assets <b>Hub</b></span>
         </a>
-        
+
         <!-- 桌面端导航 -->
-        <nav class="nav-links">
+        <nav class="nav-links" aria-label={lang === 'en' ? 'Main' : '主导航'}>
           <a href={lang === 'en' ? '/en/overview/' : '/overview/'} class={isActive('/overview/') ? 'active' : ''}>{navText.overview}</a>
           <a href={lang === 'en' ? '/en/skills/' : '/skills/'} class={isActive('/skills/') ? 'active' : ''}>{navText.skills}</a>
           <a href={lang === 'en' ? '/en/agents/' : '/agents/'} class={isActive('/agents/') ? 'active' : ''}>{navText.agents}</a>
@@ -94,9 +102,9 @@ let mobileMenuOpen = false;
           <a href={lang === 'en' ? '/en/profiles/' : '/profiles/'} class={isActive('/profiles/') ? 'active' : ''}>{navText.profiles}</a>
           <a href={lang === 'en' ? '/en/graph/' : '/graph/'} class={isActive('/graph/') ? 'active' : ''}>{navText.graph}</a>
         </nav>
-        
+
         <div class="nav-actions">
-          <button id="workflowDownloadBtn" class="workflow-download-btn" title={lang === 'en' ? 'Download workflow' : '下载当前工作流'} onclick="window.__downloadWorkflow()">📦</button>
+          <button id="workflowDownloadBtn" class="icon-btn" title={lang === 'en' ? 'Download workflow' : '下载当前工作流'} onclick="window.__downloadWorkflow()">📦</button>
           <select id="workflowSelector" class="workflow-select" aria-label={lang === 'en' ? 'Select workflow' : '选择工作流'}>
             <option value="">{lang === 'en' ? 'All Workflows' : '所有工作流'}</option>
             {Object.entries(workflowMap).map(([slug, wf]) => (
@@ -104,11 +112,11 @@ let mobileMenuOpen = false;
             ))}
           </select>
           <a class="search-link" href={lang === 'en' ? '/en/search/' : '/search/'}>{navText.search}</a>
-          <button class="theme-btn" id="themeBtn" aria-label="Toggle theme">◐</button>
+          <button class="icon-btn" id="themeBtn" aria-label="Toggle theme" title="Theme">◐</button>
           <a class="lang-switch" href={switchLangPath} title={lang === 'en' ? '切换到中文' : 'Switch to English'}>
             {lang === 'en' ? '中' : 'EN'}
           </a>
-          <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Menu">☰</button>
+          <button class="icon-btn mobile-menu-btn" id="mobileMenuBtn" aria-label="Menu" aria-expanded="false">☰</button>
         </div>
       </header>
 
@@ -121,7 +129,7 @@ let mobileMenuOpen = false;
           <a href={lang === 'en' ? '/en/workflows/' : '/workflows/'} class={isActive('/workflows/') ? 'active' : ''}>{navText.workflows}</a>
           <a href={lang === 'en' ? '/en/profiles/' : '/profiles/'} class={isActive('/profiles/') ? 'active' : ''}>{navText.profiles}</a>
           <a href={lang === 'en' ? '/en/graph/' : '/graph/'} class={isActive('/graph/') ? 'active' : ''}>{navText.graph}</a>
-          <a href={lang === 'en' ? '/en/search/' : '/search/'}>{navText.search}</a>
+          <a href={lang === 'en' ? '/en/search/' : '/search/'} class={isActive('/search/') ? 'active' : ''}>{navText.search}</a>
         </nav>
       </div>
 
@@ -155,8 +163,9 @@ let mobileMenuOpen = false;
       const mobileNav = document.getElementById('mobileNav');
       if (mobileMenuBtn && mobileNav) {
         mobileMenuBtn.addEventListener('click', () => {
-          mobileNav.classList.toggle('open');
-          mobileMenuBtn.textContent = mobileNav.classList.contains('open') ? '✕' : '☰';
+          const open = mobileNav.classList.toggle('open');
+          mobileMenuBtn.textContent = open ? '✕' : '☰';
+          mobileMenuBtn.setAttribute('aria-expanded', String(open));
         });
       }
     </script>
@@ -164,163 +173,216 @@ let mobileMenuOpen = false;
 </html>
 
 <style is:global>
-  :root {
-    --bg: #0a0b10;
-    --bg-soft: #12141c;
-    --bg-card: #161924;
-    --bg-elevated: #1c2030;
-    --border: #242838;
-    --border-soft: #1c2030;
-    --text: #e7e9f0;
-    --text-dim: #9aa0b4;
-    --text-faint: #6b7186;
-    --accent: #7c6cff;
-    --accent-2: #4dd6c8;
-    --accent-grad: linear-gradient(110deg, #7c6cff 0%, #4dd6c8 100%);
-    --good: #3ddc84;
-    --warn: #f5a623;
-    --bad: #ff6b6b;
-    --radius: 12px;
-    --radius-sm: 8px;
-    --maxw: 1100px;
-    --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
-    --font-mono: "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
-  }
-
-  [data-theme="light"] {
-    --bg: #f5f6fa;
-    --bg-soft: #ffffff;
-    --bg-card: #ffffff;
-    --bg-elevated: #f0f2f8;
-    --border: #dde1ec;
-    --border-soft: #eef0f6;
-    --text: #1a1d2e;
-    --text-dim: #5a6078;
-    --text-faint: #8890a8;
-  }
+  /* Hallmark · genre: modern-minimal · theme: brand-violet (custom) · design-system: design.md · designed-as-app */
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  html { scroll-behavior: smooth; }
-  body { background: var(--bg); color: var(--text); font-family: var(--font-sans); line-height: 1.7; -webkit-font-smoothing: antialiased; min-height: 100vh; }
+  html { scroll-behavior: smooth; overflow-x: clip; }
+  body {
+    overflow-x: clip;
+    background: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-body);
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+    font-size: 16px;
+  }
   code, pre { font-family: var(--font-mono); }
   a { color: inherit; text-decoration: none; }
   img { max-width: 100%; }
+  ::selection { background: var(--color-accent); color: var(--color-accent-ink); }
+
+  :focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
 
   .app { display: flex; flex-direction: column; min-height: 100vh; }
 
-  /* ========== 导航栏 ========== */
+  /* ========== 导航 —— 浮起工具条 ========== */
   .nav {
     position: sticky; top: 0; z-index: 50;
     display: flex; align-items: center; justify-content: space-between;
-    max-width: var(--maxw); width: 100%; margin: 0 auto; padding: 14px 24px;
-    backdrop-filter: blur(12px);
+    gap: var(--space-md);
+    width: 100%; max-width: var(--maxw);
+    margin: var(--space-sm) auto 0;
+    padding: var(--space-2xs) var(--space-sm);
+    border: 1px solid var(--color-rule-soft);
+    border-radius: var(--radius-pill);
+    background: color-mix(in oklch, var(--color-paper-2) 82%, transparent);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
   }
-  .nav::after {
-    content: ""; position: absolute; inset: 0;
-    background: rgba(10, 11, 16, 0.7); border-bottom: 1px solid var(--border-soft); z-index: -1;
+
+  .brand { display: flex; align-items: center; gap: var(--space-2xs); font-size: 15px; font-weight: 600; flex-shrink: 0; letter-spacing: -0.01em; }
+  .brand-mark {
+    width: 26px; height: 26px; flex-shrink: 0;
+    display: grid; place-items: center;
+    background: var(--color-accent);
+    color: var(--color-accent-ink);
+    border-radius: var(--radius-sm);
+    font-size: 13px;
   }
-  [data-theme="light"] .nav::after { background: rgba(245, 246, 250, 0.85); }
+  .brand-name b { color: var(--color-accent); font-weight: 700; }
 
-  .brand { display: flex; align-items: center; gap: 8px; font-size: 17px; font-weight: 600; flex-shrink: 0; }
-  .brand-icon { background: var(--accent-grad); -webkit-background-clip: text; background-clip: text; color: transparent; font-size: 20px; }
-  .brand b { background: var(--accent-grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .nav-links { display: flex; align-items: center; gap: var(--space-sm); font-size: 13.5px; }
+  .nav-links a { color: var(--color-ink-2); padding: var(--space-2xs) var(--space-xs); border-radius: var(--radius-pill); transition: color var(--dur-short) var(--ease-out), background var(--dur-short) var(--ease-out); }
+  .nav-links a:hover { color: var(--color-ink); }
+  .nav-links a.active { color: var(--color-accent); background: color-mix(in oklch, var(--color-accent) 12%, transparent); }
 
-  .nav-links { display: flex; gap: 20px; font-size: 14px; }
-  .nav-links a { color: var(--text-dim); transition: color 0.2s; }
-  .nav-links a:hover, .nav-links a.active { color: var(--text); }
+  .nav-actions { display: flex; align-items: center; gap: var(--space-2xs); flex-shrink: 0; }
 
-  .nav-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
-  .search-link { font-size: 14px; color: var(--text-dim); display: none; }
-  .theme-btn {
-    background: none; border: 1px solid var(--border); color: var(--text-dim);
-    cursor: pointer; font-size: 16px; padding: 4px 8px; border-radius: var(--radius-sm); transition: all 0.2s;
+  .icon-btn {
+    background: none; border: 1px solid var(--color-rule);
+    color: var(--color-ink-2); cursor: pointer;
+    font-size: 14px; width: 30px; height: 30px;
+    border-radius: var(--radius-pill);
+    display: flex; align-items: center; justify-content: center;
+    transition: all var(--dur-short) var(--ease-out); padding: 0;
   }
-  .theme-btn:hover { border-color: var(--accent); color: var(--text); }
-
-  .workflow-select {
-    background: var(--bg-elevated); color: var(--text); border: 1px solid var(--border);
-    border-radius: var(--radius-sm); padding: 5px 8px; font-size: 12px; cursor: pointer; outline: none;
-    transition: border-color 0.2s; max-width: 140px;
-  }
-  .workflow-select:hover, .workflow-select:focus { border-color: var(--accent); }
-
-  .workflow-download-btn {
-    background: var(--bg-elevated); border: 1px solid var(--border); color: var(--text-dim);
-    cursor: pointer; font-size: 14px; width: 32px; height: 32px; border-radius: var(--radius-sm);
-    display: flex; align-items: center; justify-content: center; transition: all 0.2s; padding: 0;
-  }
-  .workflow-download-btn:hover { border-color: var(--accent); color: var(--text); }
+  .icon-btn:hover { border-color: var(--color-accent); color: var(--color-ink); }
+  .icon-btn:active { transform: translateY(1px); }
   .workflow-download-btn.loading { animation: spin 1s linear infinite; }
   @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-  .lang-switch {
-    font-size: 12px; font-weight: 600; padding: 4px 8px; border-radius: var(--radius-sm);
-    border: 1px solid var(--border); color: var(--text-dim); transition: all 0.2s; display: none;
+  .workflow-select {
+    background: var(--color-paper-2); color: var(--color-ink);
+    border: 1px solid var(--color-rule); border-radius: var(--radius-pill);
+    padding: 5px 10px; font-size: 12px; cursor: pointer; outline: none;
+    transition: border-color var(--dur-short) var(--ease-out); max-width: 150px;
+    font-family: var(--font-body);
   }
-  .lang-switch:hover { border-color: var(--accent); color: var(--text); }
+  .workflow-select:hover, .workflow-select:focus-visible { border-color: var(--color-accent); }
 
-  .mobile-menu-btn {
-    display: none;
-    background: none; border: 1px solid var(--border); color: var(--text-dim);
-    font-size: 18px; width: 32px; height: 32px; border-radius: var(--radius-sm);
-    cursor: pointer; align-items: center; justify-content: center;
+  .search-link { font-size: 13.5px; color: var(--color-ink-2); padding: var(--space-2xs) var(--space-xs); border-radius: var(--radius-pill); transition: color var(--dur-short) var(--ease-out); display: none; }
+  .search-link:hover { color: var(--color-ink); }
+
+  .lang-switch {
+    font-size: 11px; font-weight: 600; padding: 6px 10px; border-radius: var(--radius-pill);
+    border: 1px solid var(--color-rule); color: var(--color-ink-2);
+    transition: all var(--dur-short) var(--ease-out); display: none;
+    font-family: var(--font-body);
   }
+  .lang-switch:hover { border-color: var(--color-accent); color: var(--color-ink); }
+
+  .mobile-menu-btn { display: none; }
 
   /* 移动端导航 */
   .mobile-nav {
     display: none;
-    position: fixed; top: 60px; left: 0; right: 0; bottom: 0;
-    background: var(--bg); z-index: 40; padding: 24px;
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: var(--color-paper); z-index: 40; padding: calc(var(--space-3xl) + 8px) var(--space-md) var(--space-md);
     overflow-y: auto;
   }
   .mobile-nav.open { display: block; }
-  .mobile-nav-links { display: flex; flex-direction: column; gap: 16px; }
+  .mobile-nav-links { display: flex; flex-direction: column; gap: var(--space-2xs); max-width: 600px; margin: 0 auto; }
   .mobile-nav-links a {
-    font-size: 18px; color: var(--text-dim); padding: 12px 0; border-bottom: 1px solid var(--border-soft);
+    font-size: 17px; color: var(--color-ink-2); padding: var(--space-sm) 0;
+    border-bottom: 1px solid var(--color-rule-soft);
   }
-  .mobile-nav-links a.active { color: var(--text); }
+  .mobile-nav-links a.active { color: var(--color-accent); }
 
   /* ========== 主体内容 ========== */
-  .main { flex: 1; max-width: var(--maxw); width: 100%; margin: 0 auto; padding: 40px 24px; }
-  .footer { text-align: center; padding: 32px 24px; color: var(--text-faint); font-size: 13px; border-top: 1px solid var(--border-soft); }
+  .main { flex: 1; width: 100%; max-width: var(--maxw); margin: 0 auto; padding: var(--space-2xl) var(--space-md) var(--space-3xl); }
+  .footer { text-align: center; padding: var(--space-lg) var(--space-md); color: var(--color-ink-3); font-size: 13px; border-top: 1px solid var(--color-rule-soft); }
+
+  /* ========== 通用 section head ========== */
+  .section-head { margin-bottom: var(--space-xl); }
+
+  /* ========== 列表页 hero head（与概览页呼应） ========== */
+  .page-head {
+    position: relative;
+    padding: var(--space-lg) 0 var(--space-lg);
+    margin-bottom: var(--space-lg);
+    border-bottom: 1px solid var(--color-rule-soft);
+  }
+  .page-head-kicker {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-sm);
+  }
+  .page-count {
+    font-family: var(--font-display);
+    font-size: var(--text-lg);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--color-accent);
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+  }
+  .page-title {
+    font-family: var(--font-display);
+    font-size: clamp(1.75rem, 3vw, 2.25rem);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+    margin-bottom: var(--space-xs);
+    color: var(--color-ink);
+    overflow-wrap: anywhere;
+    min-width: 0;
+  }
+  .page-desc { color: var(--color-ink-2); font-size: var(--text-md); max-width: var(--measure); }
+  .kicker {
+    font-family: var(--font-mono); font-size: var(--text-xs);
+    letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--color-accent-2); margin-bottom: var(--space-xs);
+    font-weight: 500;
+  }
+  .kicker.skill { color: var(--color-accent); }
+  .kicker.agent { color: var(--color-accent-2); }
+  .kicker.workflow { color: var(--color-warn); }
+  .kicker.profile { color: var(--color-good); }
+
+  /* 详情页类型主题色：data-kind → --page-accent */
+  .detail-layout[data-kind="skill"] { --page-accent: var(--color-accent); }
+  .detail-layout[data-kind="agent"] { --page-accent: var(--color-accent-2); }
+  .detail-layout[data-kind="workflow"] { --page-accent: var(--color-warn); }
+  .detail-layout[data-kind="profile"] { --page-accent: var(--color-good); }
+  .section-title {
+    font-family: var(--font-display); font-weight: 700;
+    font-size: clamp(1.75rem, 3vw, 2.25rem);
+    letter-spacing: -0.02em; line-height: 1.2;
+    margin-bottom: var(--space-xs);
+  }
+  .section-sub { color: var(--color-ink-2); font-size: var(--text-md); max-width: var(--measure); }
+
+  /* ========== 通用卡片网格 ========== */
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr));
+    gap: var(--space-md);
+  }
 
   /* ========== 响应式断点 ========== */
-  
-  /* 大屏幕 (1200px+) */
   @media (min-width: 1200px) {
     .search-link { display: inline; }
     .lang-switch { display: inline; }
   }
-
-  /* 平板 (768px - 1199px) */
   @media (max-width: 1199px) {
-    .workflow-select { max-width: 120px; font-size: 11px; }
     .search-link { display: inline; }
     .lang-switch { display: inline; }
+    .workflow-select { max-width: 120px; font-size: 11px; }
   }
-
-  /* 手机 (< 768px) */
-  @media (max-width: 768px) {
-    .nav { padding: 12px 16px; }
+  @media (max-width: 860px) {
     .nav-links { display: none; }
-    .nav-actions { gap: 6px; }
-    .workflow-select { max-width: 100px; padding: 4px 6px; }
+    .mobile-menu-btn { display: flex; }
     .search-link { display: none; }
     .lang-switch { display: none; }
-    .mobile-menu-btn { display: flex; }
-    
-    .main { padding: 24px 16px; }
+    .nav { margin-top: 0; border-radius: 0; border-left: none; border-right: none; border-top: none; background: color-mix(in oklch, var(--color-paper) 85%, transparent); }
+  }
+  @media (max-width: 560px) {
+    .workflow-select { max-width: 96px; font-size: 10.5px; }
+    .brand-name { font-size: 13.5px; }
+    .main { padding-top: var(--space-xl); }
   }
 
-  /* 小手机 (< 480px) */
-  @media (max-width: 480px) {
-    .nav { padding: 10px 12px; }
-    .brand { font-size: 15px; }
-    .workflow-select { max-width: 80px; font-size: 10px; }
-    .workflow-download-btn { width: 28px; height: 28px; font-size: 12px; }
-    .theme-btn { width: 28px; height: 28px; font-size: 14px; }
-    .mobile-menu-btn { width: 28px; height: 28px; font-size: 16px; }
-    
-    .main { padding: 20px 12px; }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
   }
 </style>

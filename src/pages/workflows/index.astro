@@ -11,11 +11,17 @@ const workflows = await getCollection('workflows' + suffix);
 ---
 
 <BaseLayout title="Workflows" description="Workflows collection">
-  <h1 class="section-title">Workflows</h1>
-  <p class="section-sub">
-    {lang === 'en' ? 'Multi-Agent Pipelines' : '多 Agent 协作流水线'} · {workflows.length} {lang === 'en' ? 'total' : '个'}
-    <FilterCounter />
-  </p>
+  <section class="page-head">
+    <div class="page-head-kicker">
+      <span class="kicker">{lang === 'en' ? 'Pipelines' : '流水线'}</span>
+      <span class="page-count">{workflows.length}</span>
+    </div>
+    <h1 class="page-title">Workflows</h1>
+    <p class="page-desc">
+      {lang === 'en' ? 'Multi-agent pipelines' : '多 Agent 协作流水线'}
+      <FilterCounter />
+    </p>
+  </section>
 
   <div class="card-grid">
     {workflows.map(w => (
@@ -61,16 +67,3 @@ const workflows = await getCollection('workflows' + suffix);
     initFilter();
   }
 </script>
-
-<style>
-  .section-title { font-size: clamp(22px, 3.5vw, 30px); font-weight: 700; margin-bottom: 8px; letter-spacing: -0.02em; }
-  .section-sub { color: var(--text-dim); margin-bottom: 32px; }
-  .card-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr));
-    gap: 16px;
-  }
-  @media (max-width: 480px) {
-    .card-grid { gap: 12px; }
-  }
-</style>

@@ -2,6 +2,7 @@
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 import { getCollection } from 'astro:content';
 import { getCollectionSuffix } from '../../../lib/i18n';
+import StatGrid from '../../../components/StatGrid.astro';
 
 const lang = 'en';
 const suffix = getCollectionSuffix(lang);
@@ -21,22 +22,14 @@ const stats = [
 
 <BaseLayout title="Overview" description="AI Assets Overview">
   <div id="homeAll" style="display:none;">
-    <section class="hero-large">
-      <h1 class="hero-title-large">AI Assets <span class="grad">Hub</span></h1>
-      <p class="hero-sub-large">Manage and showcase AI assets</p>
+    <section class="overview-hero">
+      <span class="kicker">Index</span>
+      <h1 class="overview-title">AI Assets <span class="accent">Hub</span></h1>
+      <p class="overview-sub">Manage and showcase AI assets</p>
     </section>
 
-    <section>
-      <div class="stat-grid">
-        {stats.map(s => (
-          <a class="stat-link" href={s.href}>
-            <div class="stat">
-              <b>{s.count}</b>
-              <span>{s.label}</span>
-            </div>
-          </a>
-        ))}
-      </div>
+    <section class="overview-stats">
+      <StatGrid stats={stats} />
     </section>
   </div>
 
@@ -65,16 +58,16 @@ const stats = [
       var html = '';
       if (overview) {
         html += '<section style="text-align:center;padding:80px 0 60px;">';
-        html += '<h1 style="font-size:clamp(48px,8vw,72px);font-weight:800;letter-spacing:-0.03em;margin:0;"><span style="background:linear-gradient(110deg,#7c6cff 0%,#4dd6c8 100%);-webkit-background-clip:text;background-clip:text;color:transparent;">' + (wf ? wf.title : saved) + '</span></h1>';
+        html += '<h1 style="font-family:var(--font-display);font-size:clamp(1.75rem,4vw,3rem);font-weight:700;letter-spacing:-0.03em;margin:0;color:var(--color-accent);">' + (wf ? wf.title : saved) + '</h1>';
         html += '</section>';
         if (overview.overview) {
-          html += '<section style="max-width:900px;margin:0 auto 40px;padding:0 24px;"><h2 style="font-size:24px;font-weight:600;margin-bottom:20px;text-align:center;">Overview</h2><div style="line-height:1.8;color:var(--text);">' + overview.overview + '</div></section>';
+          html += '<section style="max-width:780px;margin:0 auto 48px;padding:0 24px;"><h2 style="font-family:var(--font-display);font-size:var(--text-xl);font-weight:700;margin-bottom:20px;text-align:center;letter-spacing:-0.02em;">Overview</h2><div style="line-height:1.8;color:var(--color-ink-2);">' + overview.overview + '</div></section>';
         }
         if (overview.designPhilosophy) {
-          html += '<section style="max-width:900px;margin:0 auto 40px;padding:0 24px;"><h2 style="font-size:24px;font-weight:600;margin-bottom:20px;text-align:center;">Design Philosophy</h2><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;">' + renderCards(overview.designPhilosophy) + '</div></section>';
+          html += '<section style="max-width:900px;margin:0 auto 48px;padding:0 24px;"><h2 style="font-family:var(--font-display);font-size:var(--text-xl);font-weight:700;margin-bottom:20px;text-align:center;letter-spacing:-0.02em;">Design Philosophy</h2><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px;">' + renderCards(overview.designPhilosophy) + '</div></section>';
         }
       } else {
-        html = '<section style="text-align:center;padding:80px 0;"><h1 style="font-size:clamp(48px,8vw,72px);font-weight:800;">Please select a workflow</h1></section>';
+        html = '<section style="text-align:center;padding:80px 0;"><h1 style="font-family:var(--font-display);font-size:clamp(1.75rem,4vw,3rem);font-weight:700;letter-spacing:-0.03em;">Please select a workflow</h1></section>';
       }
       contentDiv.innerHTML = html;
     }
@@ -96,18 +89,18 @@ const stats = [
             var partLines = part.split('\n');
             var subTitle = partLines[0].replace(/^###\s*/, '');
             var subContent = partLines.slice(1).join('\n').trim();
-            cards += '<div style="background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:20px;min-height:160px;display:flex;flex-direction:column;">';
-            cards += '<h3 style="font-size:15px;font-weight:600;margin:0 0 10px;color:var(--accent-2);">' + subTitle + '</h3>';
+            cards += '<div style="background:var(--color-paper-2);border:1px solid var(--color-rule-soft);border-radius:var(--radius-lg);padding:20px;min-height:160px;display:flex;flex-direction:column;">';
+            cards += '<h3 style="font-family:var(--font-display);font-size:var(--text-md);font-weight:600;margin:0 0 10px;color:var(--color-accent-2);">' + subTitle + '</h3>';
             if (subContent) {
-              cards += '<div style="line-height:1.7;color:var(--text-dim);flex:1;font-size:13px;"><p style="margin:0;">' + subContent.replace(/\n/g, '<br>') + '</p></div>';
+              cards += '<div style="line-height:1.7;color:var(--color-ink-2);flex:1;font-size:var(--text-sm);"><p style="margin:0;">' + subContent.replace(/\n/g, '<br>') + '</p></div>';
             }
             cards += '</div>';
           }
         } else {
-          cards += '<div style="background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:20px;min-height:160px;display:flex;flex-direction:column;">';
-          cards += '<h3 style="font-size:15px;font-weight:600;margin:0 0 10px;color:var(--accent-2);">' + sectionTitle + '</h3>';
+          cards += '<div style="background:var(--color-paper-2);border:1px solid var(--color-rule-soft);border-radius:var(--radius-lg);padding:20px;min-height:160px;display:flex;flex-direction:column;">';
+          cards += '<h3 style="font-family:var(--font-display);font-size:var(--text-md);font-weight:600;margin:0 0 10px;color:var(--color-accent-2);">' + sectionTitle + '</h3>';
           if (restContent) {
-            cards += '<div style="line-height:1.7;color:var(--text-dim);flex:1;font-size:13px;"><p style="margin:0;">' + restContent.replace(/\n/g, '<br>') + '</p></div>';
+            cards += '<div style="line-height:1.7;color:var(--color-ink-2);flex:1;font-size:var(--text-sm);"><p style="margin:0;">' + restContent.replace(/\n/g, '<br>') + '</p></div>';
           }
           cards += '</div>';
         }
@@ -125,14 +118,18 @@ const stats = [
 </script>
 
 <style>
-  .hero-large { text-align: center; padding: 80px 0 60px; }
-  .hero-title-large { font-size: clamp(48px, 8vw, 72px); font-weight: 800; letter-spacing: -0.03em; margin-bottom: 20px; }
-  .hero-sub-large { font-size: 20px; color: var(--text-dim); }
-  .grad { background: var(--accent-grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
-  .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 16px; margin-bottom: 48px; }
-  .stat-link { text-decoration: none; color: inherit; }
-  .stat { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; text-align: center; cursor: pointer; transition: transform 0.2s, border-color 0.2s; }
-  .stat:hover { transform: translateY(-4px); border-color: var(--accent); }
-  .stat b { display: block; font-size: 28px; font-weight: 700; background: var(--accent-grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
-  .stat span { font-size: 13px; color: var(--text-dim); }
+  /* Hallmark · genre: modern-minimal · macrostructure: Stat-Led · theme: brand-violet (custom) · design-system: design.md · designed-as-app */
+  .overview-hero { text-align: center; padding: var(--space-2xl) 0 var(--space-lg); }
+  .overview-title {
+    font-family: var(--font-display);
+    font-size: var(--text-display);
+    font-weight: 700;
+    letter-spacing: -0.035em;
+    line-height: 1.1;
+    margin-bottom: var(--space-sm);
+    color: var(--color-ink);
+  }
+  .overview-title .accent { color: var(--color-accent); }
+  .overview-sub { font-size: var(--text-lg); color: var(--color-ink-2); }
+  .overview-stats { margin-top: var(--space-md); }
 </style>

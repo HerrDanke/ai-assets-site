@@ -4,14 +4,29 @@ import { getCollection } from 'astro:content';
 
 const lang = 'zh';
 const tools = await getCollection('toolsZh');
+
+const TAG_COLORS = ['tag-c0', 'tag-c1', 'tag-c2', 'tag-c3', 'tag-c4'];
+function tagColor(tag: string) {
+  let h = 0;
+  for (let i = 0; i < tag.length; i++) h = (h * 31 + tag.charCodeAt(i)) % 997;
+  return TAG_COLORS[h % TAG_COLORS.length];
+}
 ---
 
 <BaseLayout title="Tools" description="MCP 服务器与工具列表">
-  <h1 class="section-title">Tools</h1>
-  <p class="section-sub">MCP 服务器 / CLI 工具 / API · {tools.length} 个</p>
+  <section class="page-head">
+    <div class="page-head-kicker">
+      <span class="kicker">Tools</span>
+      <span class="page-count">{tools.length}</span>
+    </div>
+    <h1 class="page-title">Tools</h1>
+    <p class="page-desc">MCP 服务器 / CLI 工具 / API</p>
+  </section>
 
   {tools.length === 0 ? (
-    <p style="color: var(--text-faint); text-align: center; padding: 40px;">暂无工具内容</p>
+    <div class="empty-state">
+      <p>暂无工具内容</p>
+    </div>
   ) : (
     <div class="card-grid">
       {tools.map(t => (
@@ -20,15 +35,79 @@ const tools = await getCollection('toolsZh');
             <button class="asset-card-btn" data-slug={t.slug} data-kind="tools" data-action="copy" title="复制 Markdown">📋</button>
             <button class="asset-card-btn" data-slug={t.slug} data-kind="tools" data-action="download" title="下载 .md">⬇</button>
           </div>
-          <h3>{t.data.title}</h3>
-          <p>{t.data.description}</p>
+          <span class="card-kind">{t.data.toolType ? t.data.toolType.replace('_', ' ') : 'tool'}</span>
+          <h3 class="card-title">{t.data.title}</h3>
+          <p class="card-desc">{t.data.description}</p>
           <div class="card-meta">
-            <span class="tag kind">{t.data.toolType ? t.data.toolType.replace('_', ' ') : 'tool'}</span>
-            <span class="tag version">v{t.data.version}</span>
-            {t.data.tags.slice(0, 2).map(tag => <span class="tag">#{tag}</span>)}
+            {t.data.tags.slice(0, 2).map(tag => <span class={`tag ${tagColor(tag)}`}>#{tag}</span>)}
           </div>
         </a>
       ))}
     </div>
   )}
 </BaseLayout>
+
+<style>
+  /* Hallmark · genre: modern-minimal · macrostructure: Catalogue · theme: brand-violet (custom) · design-system: design.md · designed-as-app */
+  .empty-state {
+    text-align: center;
+    padding: var(--space-3xl) var(--space-md);
+    color: var(--color-ink-3);
+    border: 1px dashed var(--color-rule);
+    border-radius: var(--radius-lg);
+  }
+  .card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    background: var(--color-paper-2);
+    border: 1px solid var(--color-rule-soft);
+    border-radius: var(--radius-lg);
+    padding: var(--space-md);
+    transition: border-color var(--dur-md) var(--ease-out), transform var(--dur-md) var(--ease-out);
+    text-decoration: none;
+    color: inherit;
+    overflow: hidden;
+  }
+  .card:hover { border-color: var(--color-rule); transform: translateY(-2px); }
+  .card-kind {
+    font-family: var(--font-mono); font-size: var(--text-xs);
+    text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--color-accent-2); margin-bottom: var(--space-2xs);
+  }
+  .card-title {
+    font-family: var(--font-display); font-size: var(--text-lg); font-weight: 700;
+    letter-spacing: -0.01em; line-height: 1.3; margin: 0 0 var(--space-2xs);
+    overflow-wrap: anywhere; min-width: 0;
+  }
+  .card-desc {
+    font-size: var(--text-sm); color: var(--color-ink-2);
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+    overflow: hidden; margin: 0 0 var(--space-sm); line-height: 1.6;
+  }
+  .card-meta { display: flex; gap: var(--space-2xs); flex-wrap: wrap; margin-top: auto; }
+  .card-actions {
+    position: absolute; top: var(--space-xs); right: var(--space-xs);
+    display: flex; gap: var(--space-3xs);
+    opacity: 0; transition: opacity var(--dur-short) var(--ease-out);
+  }
+  .card:hover .card-actions, .card-actions:focus-within { opacity: 1; }
+  .asset-card-btn {
+    background: var(--color-elevated); border: 1px solid var(--color-rule);
+    color: var(--color-ink-2); cursor: pointer; font-size: 12px;
+    width: 26px; height: 26px; border-radius: var(--radius-sm);
+    display: flex; align-items: center; justify-content: center;
+    transition: all var(--dur-short) var(--ease-out); padding: 0;
+  }
+  .asset-card-btn:hover { border-color: var(--color-accent); color: var(--color-ink); }
+  .tag {
+    font-size: var(--text-xs); padding: 2px 10px; border-radius: var(--radius-pill);
+    background: var(--color-elevated); color: var(--color-ink-2);
+    border: 1px solid var(--color-rule-soft); font-family: var(--font-mono);
+  }
+  .tag-c0 { color: var(--color-accent);     border-color: color-mix(in oklch, var(--color-accent) 35%, transparent);     background: color-mix(in oklch, var(--color-accent) 10%, transparent); }
+  .tag-c1 { color: var(--color-accent-2);   border-color: color-mix(in oklch, var(--color-accent-2) 35%, transparent);   background: color-mix(in oklch, var(--color-accent-2) 10%, transparent); }
+  .tag-c2 { color: var(--color-warn);       border-color: color-mix(in oklch, var(--color-warn) 35%, transparent);       background: color-mix(in oklch, var(--color-warn) 10%, transparent); }
+  .tag-c3 { color: var(--color-good);       border-color: color-mix(in oklch, var(--color-good) 35%, transparent);       background: color-mix(in oklch, var(--color-good) 10%, transparent); }
+  .tag-c4 { color: var(--color-bad);        border-color: color-mix(in oklch, var(--color-bad) 35%, transparent);        background: color-mix(in oklch, var(--color-bad) 10%, transparent); }
+</style>
