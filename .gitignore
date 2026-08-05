@@ -3,3 +3,8 @@ dist/
 .astro/
 *.log
 .DS_Store
+
+# 内容从 vault 同步（真相源 Assets/catalog），不入代码库
+src/content/*/
+public/raw/
+public/workflows/

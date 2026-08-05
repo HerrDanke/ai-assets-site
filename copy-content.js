@@ -1,5 +1,5 @@
 // 将 src/content 下的 .md 文件复制到 public/raw/，供复制/下载功能使用
-import { cp, mkdir } from 'node:fs/promises';
+import { cp, mkdir, rm } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -24,6 +24,9 @@ const collections = [
 ];
 
 async function copyContent() {
+  // 先清理 public/raw 陈旧遗留目录，保证每次构建为干净镜像
+  await rm(destDir, { recursive: true, force: true });
+  await mkdir(destDir, { recursive: true });
   for (const { col, lang, folder } of collections) {
     const src = join(srcDir, col);
     const dest = join(destDir, lang, folder);
