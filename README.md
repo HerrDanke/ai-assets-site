@@ -126,7 +126,7 @@ appliesTo: ["main-assistant"]
 - **`ai-assets-deploy.timer`**（每 5 分钟）：vault `fetch` + ff-only merge → 本仓库 `fetch` + ff-only merge → `sync-from-vault.mjs` → `npm run build` → nginx 服务 `dist/`
 - 内容更新 push **vault**、站点代码更新 push **本仓库**，两者都在 **最长 5 分钟**内自动上线
 - 跳过条件：状态文件 `/run/ai-assets-deploy.lastsha`（格式 `vault_sha:site_sha`）与当前两个远端 SHA 完全一致、且 `dist/index.html` 存在时跳过构建
-- 部署脚本：`/usr/local/sbin/ai-assets-deploy.sh`（与 `docusaurus-deploy` 共享 `/run/vault-deploy.lock` 防 git 并发）
+- 部署脚本：本仓库 [`deploy/ai-assets-deploy.sh`](./deploy/ai-assets-deploy.sh) 纳管（`/usr/local/sbin/ai-assets-deploy.sh` 是指向它的软链）；与 `docusaurus-deploy` 共享 `/run/vault-deploy.lock` 防 git 并发
 
 ## 路线图
 
