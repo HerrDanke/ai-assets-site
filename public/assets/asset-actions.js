@@ -132,6 +132,8 @@
       (wf.agents || []).forEach(function (s) { list.push({ p: 'agents/' + s + '.md', k: 'agents', s: s }); });
       (wf.skills || []).forEach(function (s) { list.push({ p: 'skills/' + s + '.md', k: 'skills', s: s }); });
       (wf.profiles || []).forEach(function (s) { list.push({ p: 'profiles/' + s + '.md', k: 'profiles', s: s }); });
+      // Graph 蓝图（yaml）不在 /raw/ 下，直接用它自己的站点路径
+      if (wf.yamlPath) list.push({ p: 'workflows/' + slug + '.yaml', url: wf.yamlPath });
 
       var fetched = [];
 
@@ -166,7 +168,7 @@
         }
 
         var item = list[idx];
-        var url = '/raw/' + lang + '/' + item.k + '/' + item.s + '.md';
+        var url = item.url || ('/raw/' + lang + '/' + item.k + '/' + item.s + '.md');
 
         fetch(url)
           .then(function (r) { return r.ok ? r.text() : null; })

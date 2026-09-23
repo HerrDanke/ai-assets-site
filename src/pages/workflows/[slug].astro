@@ -58,6 +58,9 @@ const { data } = entry;
       <div class="sidebar-card sidebar-actions">
         <button class="asset-card-btn" data-slug={entry.slug} data-kind="workflows" data-action="copy" title="复制 Markdown" style="width: 100%; height: auto; padding: 8px;">📋 复制 Markdown</button>
         <button class="asset-card-btn" data-slug={entry.slug} data-kind="workflows" data-action="download" title="下载 .md" style="width: 100%; height: auto; padding: 8px;">⬇ 下载 .md</button>
+        {data.yamlPath && (
+          <a class="asset-card-btn" href={data.yamlPath} download title="下载 Graph 蓝图（YAML）" style="width: 100%; height: auto; padding: 8px; justify-content: center;">⬇ 下载 Graph 蓝图（YAML）</a>
+        )}
       </div>
     </aside>
   </div>

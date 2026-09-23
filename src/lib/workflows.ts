@@ -8,6 +8,7 @@ export interface WorkflowMap {
     agents: string[];
     skills: string[];
     profiles: string[];
+    yamlPath?: string;
     stages?: number;
     overview?: string;
     designPhilosophy?: string;
@@ -38,6 +39,7 @@ export async function buildWorkflowMap(suffix: string): Promise<WorkflowMap> {
       agents: participantSlugs,
       skills: wfSkills,
       profiles: wfProfiles,
+      yamlPath: wf.data.yamlPath,
       stages: wf.data.stages,
       overview: wf.data.overview,
       designPhilosophy: wf.data.designPhilosophy,
