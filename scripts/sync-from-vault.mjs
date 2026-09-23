@@ -8,14 +8,12 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..'); /
 const VAULT = process.env.VAULT_ROOT || '/root/webhost/vault';
 const CATALOG = path.join(VAULT, 'Assets', 'catalog');
 
-// 12 个 collection（8 个非空 + 4 个空，mkdir 生成保证 astro 全存在）
+// 8 个 collection（vault catalog 下的双语目录，mkdir 生成保证 astro 全存在）
 const collections = [
   'agentsZh', 'agentsEn',
   'skillsZh', 'skillsEn',
   'profilesZh', 'profilesEn',
   'workflowsZh', 'workflowsEn',
-  'promptsZh', 'promptsEn',
-  'toolsZh', 'toolsEn',
 ];
 
 let copied = 0;

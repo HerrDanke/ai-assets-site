@@ -8,16 +8,12 @@ const skills = await getCollection('skillsZh');
 const agents = await getCollection('agentsZh');
 const workflows = await getCollection('workflowsZh');
 const profiles = await getCollection('profilesZh');
-const tools = await getCollection('toolsZh');
-const prompts = await getCollection('promptsZh');
 
 const allItems = [
   ...skills.map(s => ({ slug: s.slug, kind: 'skills', title: s.data.title, description: s.data.description, tags: s.data.tags ?? [], version: s.data.version })),
   ...agents.map(a => ({ slug: a.slug, kind: 'agents', title: a.data.title, description: a.data.description, tags: a.data.tags ?? [], version: a.data.version })),
   ...workflows.map(w => ({ slug: w.slug, kind: 'workflows', title: w.data.title, description: w.data.description, tags: w.data.tags ?? [], version: w.data.version })),
   ...profiles.map(p => ({ slug: p.slug, kind: 'profiles', title: p.data.title, description: p.data.description, tags: p.data.tags ?? [], version: p.data.version })),
-  ...tools.map(t => ({ slug: t.slug, kind: 'tools', title: t.data.title, description: t.data.description, tags: t.data.tags ?? [], version: t.data.version })),
-  ...prompts.map(p => ({ slug: p.slug, kind: 'prompts', title: p.data.title, description: p.data.description, tags: p.data.tags ?? [], version: p.data.version })),
 ];
 ---
 
@@ -45,8 +41,6 @@ const allItems = [
       <button class="filter-btn" data-filter="agents">Agents</button>
       <button class="filter-btn" data-filter="workflows">Workflows</button>
       <button class="filter-btn" data-filter="profiles">Profiles</button>
-      <button class="filter-btn" data-filter="tools">Tools</button>
-      <button class="filter-btn" data-filter="prompts">Prompts</button>
     </div>
     <div id="search-results" class="card-grid">
       {allItems.map(item => (
@@ -122,7 +116,6 @@ const allItems = [
   .search-kind.agents { color: var(--color-accent-2); }
   .search-kind.workflows { color: var(--color-warn); }
   .search-kind.profiles { color: var(--color-good); }
-  .search-kind.tools, .search-kind.prompts { color: var(--color-ink-2); }
   .search-title {
     font-family: var(--font-display);
     font-size: var(--text-md);

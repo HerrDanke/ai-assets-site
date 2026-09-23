@@ -132,7 +132,6 @@
       (wf.agents || []).forEach(function (s) { list.push({ p: 'agents/' + s + '.md', k: 'agents', s: s }); });
       (wf.skills || []).forEach(function (s) { list.push({ p: 'skills/' + s + '.md', k: 'skills', s: s }); });
       (wf.profiles || []).forEach(function (s) { list.push({ p: 'profiles/' + s + '.md', k: 'profiles', s: s }); });
-      (wf.tools || []).forEach(function (s) { list.push({ p: 'tools/' + s + '.md', k: 'tools', s: s }); });
 
       var fetched = [];
 

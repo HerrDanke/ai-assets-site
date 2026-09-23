@@ -1,6 +1,6 @@
 # AI Assets Hub
 
-管理和展示 AI 资产的静态站点：Skills · Agents · Workflows · Prompts · Tools · Profiles（中英双语）。
+管理和展示 AI 资产的静态站点：Skills · Agents · Workflows · Profiles（中英双语）。
 
 ## 架构概览
 
@@ -60,8 +60,6 @@ npm run preview -- --port 8083
 /profiles/      画像    列表 + 详情
 /graph/         图谱    Mermaid 关系图（按工作流过滤）
 /search/        搜索    全文检索 + 类型筛选
-/prompts/       提示词  列表
-/tools/         工具    列表
 /en/            以上所有页面的英文镜像
 ```
 
@@ -74,8 +72,6 @@ vault/Assets/catalog/
 ├── skillsZh/   skillsEn/     # 工作方法论（.md）
 ├── agentsZh/   agentsEn/     # 角色预设（.md）
 ├── workflowsZh/ workflowsEn/ # 流水线定义（.md + yaml 引用）
-├── promptsZh/  promptsEn/    # 可复用提示词（.md）
-├── toolsZh/    toolsEn/      # MCP 服务器 / CLI 工具（.md）
 ├── profilesZh/ profilesEn/   # 身份片段（.md）
 └── workflows-yaml/           # 流水线 Graph 蓝图（.yaml）→ 同步到 public/workflows/
 ```

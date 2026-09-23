@@ -8,7 +8,6 @@ export interface WorkflowMap {
     agents: string[];
     skills: string[];
     profiles: string[];
-    tools: string[];
     stages?: number;
     overview?: string;
     designPhilosophy?: string;
@@ -32,7 +31,6 @@ export async function buildWorkflowMap(suffix: string): Promise<WorkflowMap> {
 
     const wfSkills = [...new Set(participants.flatMap(a => a.data.skills ?? []))];
     const wfProfiles = [...new Set(participants.flatMap(a => a.data.profiles ?? []))];
-    const wfTools = [...new Set(participants.flatMap(a => a.data.tools ?? []))];
 
     map[wf.slug] = {
       title: wf.data.title,
@@ -40,7 +38,6 @@ export async function buildWorkflowMap(suffix: string): Promise<WorkflowMap> {
       agents: participantSlugs,
       skills: wfSkills,
       profiles: wfProfiles,
-      tools: wfTools,
       stages: wf.data.stages,
       overview: wf.data.overview,
       designPhilosophy: wf.data.designPhilosophy,

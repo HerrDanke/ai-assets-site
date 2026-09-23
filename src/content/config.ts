@@ -65,28 +65,7 @@ function workflowSchema() {
   });
 }
 
-// --- 4. Prompts ---
-function promptSchema() {
-  return baseSchema.extend({
-    kind: z.enum(['prompt']),
-    useCase: z.string(),
-    applicableAgents: z.array(z.string()).default([]),
-    variables: z.array(z.string()).default([]),
-  });
-}
-
-// --- 5. Tools ---
-function toolSchema() {
-  return baseSchema.extend({
-    kind: z.enum(['tool']),
-    toolType: z.enum(['mcp_server', 'cli_tool', 'api', 'library']),
-    installCommand: z.string().optional(),
-    configExample: z.string().optional(),
-    usedBy: z.array(z.string()).default([]),
-  });
-}
-
-// --- 6. Profiles ---
+// --- 4. Profiles ---
 function profileSchema() {
   return baseSchema.extend({
     kind: z.enum(['profile']),
@@ -101,16 +80,12 @@ function profileSchema() {
 const skillsZh = defineCollection({ type: 'content', schema: skillSchema() });
 const agentsZh = defineCollection({ type: 'content', schema: agentSchema() });
 const workflowsZh = defineCollection({ type: 'content', schema: workflowSchema() });
-const promptsZh = defineCollection({ type: 'content', schema: promptSchema() });
-const toolsZh = defineCollection({ type: 'content', schema: toolSchema() });
 const profilesZh = defineCollection({ type: 'content', schema: profileSchema() });
 
 // 英文 collections
 const skillsEn = defineCollection({ type: 'content', schema: skillSchema() });
 const agentsEn = defineCollection({ type: 'content', schema: agentSchema() });
 const workflowsEn = defineCollection({ type: 'content', schema: workflowSchema() });
-const promptsEn = defineCollection({ type: 'content', schema: promptSchema() });
-const toolsEn = defineCollection({ type: 'content', schema: toolSchema() });
 const profilesEn = defineCollection({ type: 'content', schema: profileSchema() });
 
 export const collections = {
@@ -118,14 +93,10 @@ export const collections = {
   skillsZh,
   agentsZh,
   workflowsZh,
-  promptsZh,
-  toolsZh,
   profilesZh,
   // 英文
   skillsEn,
   agentsEn,
   workflowsEn,
-  promptsEn,
-  toolsEn,
   profilesEn,
 };

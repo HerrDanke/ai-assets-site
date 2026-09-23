@@ -12,14 +12,10 @@ const collections = [
   { col: 'skillsZh', lang: 'zh', folder: 'skills' },
   { col: 'agentsZh', lang: 'zh', folder: 'agents' },
   { col: 'workflowsZh', lang: 'zh', folder: 'workflows' },
-  { col: 'promptsZh', lang: 'zh', folder: 'prompts' },
-  { col: 'toolsZh', lang: 'zh', folder: 'tools' },
   { col: 'profilesZh', lang: 'zh', folder: 'profiles' },
   { col: 'skillsEn', lang: 'en', folder: 'skills' },
   { col: 'agentsEn', lang: 'en', folder: 'agents' },
   { col: 'workflowsEn', lang: 'en', folder: 'workflows' },
-  { col: 'promptsEn', lang: 'en', folder: 'prompts' },
-  { col: 'toolsEn', lang: 'en', folder: 'tools' },
   { col: 'profilesEn', lang: 'en', folder: 'profiles' },
 ];
 
